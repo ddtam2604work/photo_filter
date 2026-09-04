@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply transition-colors duration-200;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Plus Jakarta Sans', Inter, sans-serif;
+  }
+}
+
+/* Custom button classes to complement ui/Button */
+.btn-caramel {
+  background-color: #a67c37;
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+.btn-caramel:hover {
+  background-color: #916a2d;
+  box-shadow: 0 4px 14px 0 rgba(166, 124, 55, 0.39);
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-panel {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Continuous Automatic 35mm Film Reel Marquee */
+@keyframes filmReelScroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-film-reel {
+  display: flex;
+  width: max-content;
+  animation: filmReelScroll 36s linear infinite;
+  will-change: transform;
+}
+
+.animate-film-reel:hover {
+  animation-play-state: paused;
+}
