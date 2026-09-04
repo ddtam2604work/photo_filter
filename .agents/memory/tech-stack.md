@@ -1,6 +1,7 @@
 # Công Nghệ & Quy Chuẩn Kỹ Thuật (Tech Stack)
 
 ## 1. Công nghệ chính
+
 - **Core Framework Frontend:** React 18 (JSX, ES Modules)
 - **Server Framework:** NestJS / Express BFF (theo kiến trúc chuẩn của `E:\SpintX\Source`) phục vụ API endpoints & static assets
 - **Build Tool:** Vite 3.x
@@ -9,10 +10,11 @@
 - **Routing:** `react-router-dom` v6 (Lazy Loading + Suspense)
 - **UI Components:** 28 Atomic Components tại `src/components/ui/` (Tuân thủ nguyên tắc không sửa code bên trong, chỉ truyền props)
 - **Notifications:** `react-toastify`
-- **Tầng API:** `ApiRequestManager` singleton client, `callApi` adapter kết nối tới NestJS API Server (`http://localhost:6521/api`) theo chuẩn `/request-manager` skill
+- **Tầng API:** `ApiRequestManager` singleton client, `callApi` adapter kết nối tới NestJS API Server (`http://localhost:6531/api`) theo chuẩn `/request-manager` skill
 - **Tối ưu tìm kiếm:** Chuẩn On-Page Technical SEO và SGE Hook theo `/seo-sge-master` skill
 
 ## 2. Quy ước bắt buộc (Strict Rules)
+
 1. **Path Alias:** Luôn dùng `@/` thay cho relative path dài.
 2. **Bảo tồn mã nguồn UI:** Tuyệt đối không thay đổi mã nguồn trong `src/components/ui/`.
 3. **Dark Mode:** Mọi thành phần hiển thị đều hỗ trợ class `dark:`.

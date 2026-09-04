@@ -14,7 +14,7 @@ e:/photo_filter/
 │   ├── banner.jpg                  # Nền lá gân xuyên sáng cho Hero section
 │   └── images/                     # Ảnh bộ sưu tập & banner cưới chất lượng cao
 ├── server/                         # Tầng máy chủ NestJS / Express BFF (theo chuẩn E:\SpintX\Source)
-│   ├── server.js                   # Server entry point chạy tại port 6521
+│   ├── server.js                   # Server entry point chạy tại port 6531
 │   └── src/
 │       ├── app.module.js           # Root AppModule
 │       └── modules/
