@@ -90,8 +90,25 @@
     - Thiết kế nút dạng hình vuông bo góc `rounded-lg` kính mờ `bg-black/40 hover:bg-black/75 backdrop-blur-xs border-[1.5px] border-white/90 text-white hover:scale-110`, cân đối hoàn hảo với nút tròn checkmark ở góc dưới bên phải.
     - Nhấn vào icon sẽ kích hoạt Lightbox Modal phóng to ảnh 4K độ nét cao, hiển thị đầy đủ tên file, version, trạng thái, kích thước pixel, dung lượng file, nút duyệt ảnh trước/sau `<` `>` và các thao tác chọn ảnh / yêu cầu chỉnh sửa.
 
+- [x] Tích Hợp Nút Hủy Yêu Cầu & Dropdown Phiên Bản Ver 5 (`/album/:id` - AlbumDetail.jsx & albumApi.js):
+  - **Nút Hủy Yêu Cầu chuyển trạng thái từ `ĐÃ YÊU CẦU` về `bình thường`:**
+    - **Thẻ hình:** Giữ nguyên badge `ĐÃ YÊU CẦU` tinh tế và thẩm mỹ, không hiển thị nút hủy trực tiếp trên thẻ hình.
+    - **Thanh nổi dính đáy (Floating Bottom Toolbar):** Bổ sung nút `[HỦY YÊU CẦU]` màu viền đỏ/rose sang trọng bên cạnh nút `[GỬI YÊU CẦU CHỈNH SỬA]`, cho phép hủy yêu cầu hàng loạt cho các ảnh được chọn đang ở trạng thái `requested`.
+    - **Sidebar Chi Tiết Ảnh & Thẻ Hình:** Loại bỏ hoàn toàn nút hủy trong sidebar và thẻ hình để giao diện tinh tế, gọn gàng.
+    - **Thanh nổi dính đáy (Floating Bottom Toolbar):**
+      - Kéo dài thanh công cụ nổi lên `max-w-6xl xl:max-w-7xl` và mở rộng ô nhập liệu `min-w-[280px] sm:min-w-[400px]` giúp hiển thị trọn vẹn nội dung văn bản và số ký tự mà không bị chèn ép.
+      - Hiển thị đồng thời cả `Chọn tất cả` và `Bỏ chọn tất cả` (`Đã chọn N ảnh | Chọn tất cả / Bỏ chọn tất cả`).
+      - Nút `[HỦY YÊU CẦU]` màu viền đỏ/rose sang trọng bên cạnh nút `[GỬI YÊU CẦU CHỈNH SỬA]`.
+    - **Tầng API chuẩn request-manager:** Bổ sung hàm `cancelPhotoRequestApi(data)` gọi POST `/api/v1/albums/huy-yeu-cau-chinh-sua` với `showOverlay: true`.
+  - **Điều chỉnh Ver 5+ thành Menu Sổ Xuống (Dropdown Ver 5):**
+    - Chuyển đổi tab cứng `Ver 5+ (2)` thành Dropdown `Ver 5` có icon mũi tên sổ xuống `chevron-down` và trạng thái active đồng bộ màu vàng đồng `#a67c37`.
+    - Tự động phát hiện động các version `>= 5` (`higherVersions`) từ dữ liệu ảnh trả về từ chủ studio (ví dụ `Ver 5 (1)`, `Ver 6 (1)`...).
+    - Hỗ trợ click-outside để tự động đóng dropdown, lọc tức thời danh sách ảnh theo từng version được chọn.
+  - **Hero CTA Buttons (Trang Chủ - Home.jsx):** Cố định kích thước 2 nút `[Xem hướng dẫn ►]` và `[Đăng kí →]` bằng nhau chính xác tuyệt đối (`w-44 sm:w-48 !h-12 sm:!h-13`), căn giữa, `whitespace-nowrap`, hiển thị trên 1 dòng duy nhất, cân đối và đồng đều 100%.
+
 ## 2. Kế hoạch tiếp theo
 - Mở rộng các tính năng chỉnh sửa chuyên sâu và export album cho studio.
+
 
 
 

@@ -56,3 +56,11 @@ export const updatePhotoFeedbackApi = (data) =>
 export const addPhotoCommentApi = (data) =>
   callApi.post("/api/v1/albums/binh-luan-anh", data, { showOverlay: true });
 
+/**
+ * Hủy yêu cầu chỉnh sửa cho một hoặc nhiều ảnh, chuyển trạng thái về bình thường
+ * @param {{ album_id: string|number, photo_ids: Array<string|number> }} data
+ */
+export const cancelPhotoRequestApi = (data) =>
+  callApi.post("/api/v1/albums/huy-yeu-cau-chinh-sua", data, { showOverlay: true });
+
+

@@ -82,15 +82,15 @@ const Home = () => {
             <div className="pt-4 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
               {/* Left Button: Xem hướng dẫn with Play Icon */}
               <Button
-                className="!bg-[#a67c37] hover:!bg-[#916a2d] active:!bg-[#7a5722] !text-white !rounded-xl sm:!rounded-2xl px-6 py-3.5 text-base font-semibold shadow-sm hover:shadow-md transition-all duration-200"
+                className="w-44 sm:w-48 !h-12 sm:!h-13 !bg-[#a67c37] hover:!bg-[#916a2d] active:!bg-[#7a5722] !text-white !rounded-xl sm:!rounded-2xl text-sm sm:text-base font-semibold shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap !p-0 inline-flex items-center justify-center cursor-pointer"
                 onClick={() => {
                   const workflowElem = document.getElementById("workflow");
                   workflowElem?.scrollIntoView({ behavior: "smooth" });
                 }}
               >
-                <span className="flex items-center gap-2.5">
+                <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                   <span>Xem hướng dẫn</span>
-                  <svg className="w-4 h-4 fill-current translate-y-[0.5px]" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current translate-y-[0.5px] flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </span>
@@ -98,9 +98,10 @@ const Home = () => {
 
               {/* Right Button: Đăng kí with Arrow Right */}
               <Button
-                className="!bg-[#a67c37] hover:!bg-[#916a2d] active:!bg-[#7a5722] !text-white !rounded-xl sm:!rounded-2xl px-7 py-3.5 text-base font-semibold shadow-sm hover:shadow-md transition-all duration-200"
+                className="w-44 sm:w-48 !h-12 sm:!h-13 !bg-[#a67c37] hover:!bg-[#916a2d] active:!bg-[#7a5722] !text-white !rounded-xl sm:!rounded-2xl text-sm sm:text-base font-semibold shadow-sm hover:shadow-md transition-all duration-200 whitespace-nowrap !p-0 inline-flex items-center justify-center cursor-pointer"
                 icon="arrow-right"
                 iconPosition="right"
+                iconClass="!w-4 !h-4"
                 text="Đăng kí"
                 onClick={() => {
                   const bannerElem = document.getElementById("banner");

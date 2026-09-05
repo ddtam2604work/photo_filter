@@ -15,6 +15,7 @@ import {
   getAlbumDetailApi,
   updatePhotoFeedbackApi,
   addPhotoCommentApi,
+  cancelPhotoRequestApi,
 } from "@/api/core/albumApi";
 
 // Dữ liệu 7 khung hình lục giác tổ ong (Hexagonal Honeycomb) cho Banner theo thiết kế mẫu
@@ -489,7 +490,7 @@ const INITIAL_PHOTOS = [
     id: 12,
     filename: "wedding_portrait_12.jpg",
     src: "/images/gallery_car.jpg",
-    version: "VER 5+",
+    version: "VER 5",
     versionNum: 5,
     status: null,
     statusLabel: null,
@@ -509,6 +510,25 @@ const INITIAL_PHOTOS = [
         timeline: "VER 1 → VER 2 • 09:20 28/05/2025",
       },
     ],
+    comments: [],
+  },
+  {
+    id: 13,
+    filename: "wedding_portrait_13.jpg",
+    src: "/images/banner_bride_shoulder.jpg",
+    version: "VER 6",
+    versionNum: 6,
+    status: null,
+    statusLabel: null,
+    statusColor: null,
+    dimensions: "4000 x 3000",
+    filesize: "3.0 MB",
+    requestInfo: {
+      iteration: "Yêu cầu lần 6 • 11:15 29/05/2025",
+      content: "Cân bằng ánh sáng viền vai và độ sắc nét voan cài tóc.",
+      sender: "Khách hàng",
+    },
+    editHistory: [],
     comments: [],
   },
 ];
@@ -537,6 +557,44 @@ const AlbumDetail = () => {
   const [editRequestText, setEditRequestText] = useState("");
   // Input bình luận trong khung Hình 3
   const [commentInput, setCommentInput] = useState("");
+  // Trạng thái mở menu Dropdown Ver 5
+  const [isVerDropdownOpen, setIsVerDropdownOpen] = useState(false);
+  const verDropdownRef = useRef(null);
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (verDropdownRef.current && !verDropdownRef.current.contains(e.target)) {
+        setIsVerDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Danh sách các phiên bản >= 5 tự động phát hiện từ dữ liệu ảnh (hoặc trả về thêm từ studio)
+  const higherVersions = useMemo(() => {
+    const versionsInPhotos = photos
+      .map((p) => p.versionNum)
+      .filter((v) => typeof v === "number" && v >= 5);
+    return Array.from(new Set([5, 6, ...versionsInPhotos])).sort((a, b) => a - b);
+  }, [photos]);
+
+  const isHigherVerActive =
+    activeVersionFilter.startsWith("ver") &&
+    parseInt(activeVersionFilter.replace("ver", ""), 10) >= 5;
+
+  const currentActiveVerNum = isHigherVerActive
+    ? parseInt(activeVersionFilter.replace("ver", ""), 10)
+    : 5;
+
+  const countForCurrentVer = photos.filter(
+    (p) => p.versionNum === currentActiveVerNum
+  ).length;
+
+  const selectedHigherVerLabel = isHigherVerActive
+    ? `Ver ${currentActiveVerNum} (${countForCurrentVer})`
+    : `Ver 5 (${photos.filter((p) => p.versionNum === 5).length})`;
 
   // Mở lightbox xem ảnh phóng to từ icon góc dưới bên trái của thẻ
   const handleOpenLightbox = (e, photo) => {
@@ -590,7 +648,12 @@ const AlbumDetail = () => {
       else if (activeVersionFilter === "ver2") matchVersion = item.versionNum === 2;
       else if (activeVersionFilter === "ver3") matchVersion = item.versionNum === 3;
       else if (activeVersionFilter === "ver4") matchVersion = item.versionNum === 4;
-      else if (activeVersionFilter === "ver5") matchVersion = item.versionNum >= 5;
+      else if (activeVersionFilter.startsWith("ver")) {
+        const vNum = parseInt(activeVersionFilter.replace("ver", ""), 10);
+        if (!isNaN(vNum)) {
+          matchVersion = item.versionNum === vNum;
+        }
+      }
 
       // Lọc tìm kiếm
       const matchSearch =
@@ -611,15 +674,16 @@ const AlbumDetail = () => {
     );
   };
 
-  // Xử lý chọn tất cả / bỏ chọn tất cả
-  const handleToggleSelectAll = () => {
-    if (selectedPhotoIds.length > 0) {
-      setSelectedPhotoIds([]);
-      toast.info("Đã bỏ chọn tất cả ảnh!");
-    } else {
-      setSelectedPhotoIds(filteredPhotos.map((p) => p.id));
-      toast.success(`Đã chọn toàn bộ ${filteredPhotos.length} ảnh!`);
-    }
+  // Xử lý chọn tất cả
+  const handleSelectAll = () => {
+    setSelectedPhotoIds(filteredPhotos.map((p) => p.id));
+    toast.success(`Đã chọn toàn bộ ${filteredPhotos.length} ảnh!`);
+  };
+
+  // Xử lý bỏ chọn tất cả
+  const handleDeselectAll = () => {
+    setSelectedPhotoIds([]);
+    toast.info("Đã bỏ chọn tất cả ảnh!");
   };
 
   // Xử lý khi nhấn vào ảnh trong lưới (Yêu cầu 2: Khi nhấn vào trang ở hình 2 sẽ hiển thị khung giao diện hình 3)
@@ -652,6 +716,132 @@ const AlbumDetail = () => {
       toast.success(`Đã gửi yêu cầu chỉnh sửa cho ${selectedPhotoIds.length} ảnh thành công!`);
       setEditRequestText("");
     }
+  };
+
+  // Xử lý hủy yêu cầu chỉnh sửa cho 1 bức ảnh cụ thể -> chuyển về trạng thái bình thường (null)
+  const handleCancelRequest = async (e, photoId) => {
+    if (e && e.stopPropagation) e.stopPropagation();
+
+    const targetPhoto = photos.find((p) => p.id === photoId);
+    const photoName = targetPhoto ? `"${targetPhoto.filename}"` : "ảnh";
+
+    try {
+      await cancelPhotoRequestApi({
+        album_id: id || 1,
+        photo_ids: [photoId],
+      });
+    } catch (err) {
+      // Mock mode fallback
+    }
+
+    // Cập nhật trạng thái ảnh về bình thường (status: null)
+    setPhotos((prev) =>
+      prev.map((p) =>
+        p.id === photoId
+          ? {
+              ...p,
+              status: null,
+              statusLabel: null,
+              statusColor: null,
+            }
+          : p
+      )
+    );
+
+    // Đồng bộ activePhoto nếu đang mở xem chi tiết
+    setActivePhoto((prev) =>
+      prev && prev.id === photoId
+        ? {
+            ...prev,
+            status: null,
+            statusLabel: null,
+            statusColor: null,
+          }
+        : prev
+    );
+
+    // Đồng bộ lightboxPhoto nếu đang mở
+    setLightboxPhoto((prev) =>
+      prev && prev.id === photoId
+        ? {
+            ...prev,
+            status: null,
+            statusLabel: null,
+            statusColor: null,
+          }
+        : prev
+    );
+
+    toast.success(`Đã hủy yêu cầu cho ${photoName}, chuyển về trạng thái bình thường!`);
+  };
+
+  // Xử lý hủy yêu cầu hàng loạt từ thanh công cụ nổi dính đáy
+  const handleBatchCancelRequest = async () => {
+    if (selectedPhotoIds.length === 0) {
+      toast.warning("Vui lòng chọn ảnh để hủy yêu cầu!");
+      return;
+    }
+
+    // Lọc ra các ảnh đang ở trạng thái 'requested' (ĐÃ YÊU CẦU)
+    const requestedSelected = photos.filter(
+      (p) => selectedPhotoIds.includes(p.id) && p.status === "requested"
+    );
+
+    if (requestedSelected.length === 0) {
+      toast.info("Các ảnh được chọn hiện không có yêu cầu nào đang chờ xử lý.");
+      return;
+    }
+
+    const idsToCancel = requestedSelected.map((p) => p.id);
+
+    try {
+      await cancelPhotoRequestApi({
+        album_id: id || 1,
+        photo_ids: idsToCancel,
+      });
+    } catch (err) {
+      // Mock mode fallback
+    }
+
+    // Cập nhật danh sách ảnh về bình thường
+    setPhotos((prev) =>
+      prev.map((p) =>
+        idsToCancel.includes(p.id)
+          ? {
+              ...p,
+              status: null,
+              statusLabel: null,
+              statusColor: null,
+            }
+          : p
+      )
+    );
+
+    // Đồng bộ activePhoto
+    setActivePhoto((prev) =>
+      prev && idsToCancel.includes(prev.id)
+        ? {
+            ...prev,
+            status: null,
+            statusLabel: null,
+            statusColor: null,
+          }
+        : prev
+    );
+
+    // Đồng bộ lightboxPhoto
+    setLightboxPhoto((prev) =>
+      prev && idsToCancel.includes(prev.id)
+        ? {
+            ...prev,
+            status: null,
+            statusLabel: null,
+            statusColor: null,
+          }
+        : prev
+    );
+
+    toast.success(`Đã hủy yêu cầu cho ${idsToCancel.length} ảnh, chuyển về trạng thái bình thường!`);
   };
 
   // Thêm bình luận trong khung Hình 3
@@ -1014,17 +1204,75 @@ const AlbumDetail = () => {
               >
                 Ver 4 (5)
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveVersionFilter("ver5")}
-                className={`px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
-                  activeVersionFilter === "ver5"
-                    ? "bg-[#a67c37] text-white shadow-xs"
-                    : "bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                }`}
-              >
-                Ver 5+ (2)
-              </button>
+
+              {/* DROPDOWN VER 5 (THAY THẾ VER 5+) - TỰ ĐỘNG HIỂN THỊ CÁC VER TRẢ VỀ TỪ CHỦ STUDIO */}
+              <div className="relative inline-block" ref={verDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsVerDropdownOpen(!isVerDropdownOpen)}
+                  aria-expanded={isVerDropdownOpen}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                    isHigherVerActive
+                      ? "bg-[#a67c37] text-white shadow-xs"
+                      : "bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  }`}
+                  title="Chọn phiên bản Ver 5 trở lên"
+                >
+                  <span>{selectedHigherVerLabel}</span>
+                  <Icon
+                    icon="heroicons-outline:chevron-down"
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isVerDropdownOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {/* Menu sổ xuống các version */}
+                {isVerDropdownOpen && (
+                  <div className="absolute left-0 mt-1.5 z-40 min-w-[170px] py-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl backdrop-blur-xs">
+                    <div className="px-3 py-1.5 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700/60">
+                      Phiên bản nâng cao
+                    </div>
+                    {higherVersions.map((v) => {
+                      const count = photos.filter((p) => p.versionNum === v).length;
+                      const isCurrent = activeVersionFilter === `ver${v}`;
+                      return (
+                        <button
+                          key={v}
+                          type="button"
+                          onClick={() => {
+                            setActiveVersionFilter(`ver${v}`);
+                            setIsVerDropdownOpen(false);
+                            toast.info(`Đang hiển thị ảnh phiên bản Ver ${v}!`);
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold transition-colors cursor-pointer ${
+                            isCurrent
+                              ? "bg-[#a67c37]/10 dark:bg-amber-400/15 text-[#a67c37] dark:text-amber-400 font-bold"
+                              : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/60"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5">
+                            {isCurrent && (
+                              <Icon icon="heroicons-outline:check" className="w-3.5 h-3.5 text-[#a67c37] dark:text-amber-400" />
+                            )}
+                            <span>Ver {v}</span>
+                          </div>
+                          <span
+                            className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                              isCurrent
+                                ? "bg-[#a67c37] text-white font-bold"
+                                : "bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+                            }`}
+                          >
+                            {count} ảnh
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Sắp xếp: Mới nhất */}
@@ -1349,6 +1597,7 @@ const AlbumDetail = () => {
                       </span>
                     </div>
                   </div>
+
                 </div>
 
                 {/* 3. CARD 2 THEO HÌNH 3: BÌNH LUẬN VỚI EMPTY STATE & TEXTAREA */}
@@ -1442,15 +1691,15 @@ const AlbumDetail = () => {
         </section>
 
         {/* ========================================================================= */}
-        {/* 6. THANH CÔNG CỤ NỔI DÍNH ĐÁY MÀN HÌNH (ĐƯỢC NÂNG CẤP HOÀN TOÀN ĐẶC & NỔI) */}
+        {/* 6. THANH CÔNG CỤ NỔI DÍNH ĐÁY MÀN HÌNH (KÉO DÀI ĐỂ HIỂN THỊ TRỌN VẸN NỘI DUNG) */}
         {/* ========================================================================= */}
         <aside
           aria-label="Thanh công cụ chỉnh sửa ảnh nhanh"
-          className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-4xl bg-white dark:bg-slate-900 rounded-2xl sm:rounded-full border-2 border-slate-200/90 dark:border-slate-700 shadow-[0_16px_45px_rgba(0,0,0,0.28)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-3 sm:px-6 sm:py-3.5 transition-all duration-300 ring-1 ring-black/5 dark:ring-white/10"
+          className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 w-[96%] max-w-6xl xl:max-w-7xl bg-white dark:bg-slate-900 rounded-2xl sm:rounded-full border-2 border-slate-200/90 dark:border-slate-700 shadow-[0_16px_45px_rgba(0,0,0,0.28)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.7)] p-3 sm:px-6 sm:py-3.5 transition-all duration-300 ring-1 ring-black/5 dark:ring-white/10"
         >
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            {/* Trái: Icon checkmark + "Đã chọn N ảnh" | "Bỏ chọn tất cả" */}
-            <div className="flex items-center gap-2.5 whitespace-nowrap">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            {/* Trái: Icon checkmark + "Đã chọn N ảnh" | "Chọn tất cả" / "Bỏ chọn tất cả" */}
+            <div className="flex items-center gap-2.5 whitespace-nowrap flex-shrink-0">
               <div className="w-6 h-6 rounded-full bg-[#b38840] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                 <svg className="w-3.5 h-3.5 stroke-current stroke-3 fill-none" viewBox="0 0 24 24">
                   <path d="M20 6L9 17l-5-5" />
@@ -1462,36 +1711,55 @@ const AlbumDetail = () => {
               <span className="text-slate-300 dark:text-slate-600">|</span>
               <button
                 type="button"
-                onClick={handleToggleSelectAll}
-                className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 underline transition-colors"
+                onClick={handleSelectAll}
+                className="text-xs text-slate-600 hover:text-[#a67c37] dark:text-slate-300 dark:hover:text-amber-400 font-medium underline transition-colors cursor-pointer"
               >
-                {selectedPhotoIds.length > 0 ? "Bỏ chọn tất cả" : "Chọn tất cả"}
+                Chọn tất cả
+              </button>
+              <span className="text-slate-300 dark:text-slate-600">/</span>
+              <button
+                type="button"
+                onClick={handleDeselectAll}
+                className="text-xs text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 underline transition-colors cursor-pointer"
+              >
+                Bỏ chọn tất cả
               </button>
             </div>
 
-            {/* Giữa: Ô nhập yêu cầu chỉnh sửa + đếm ký tự 0/500 */}
-            <div className="flex-1 w-full sm:w-auto relative">
+            {/* Giữa: Ô nhập yêu cầu chỉnh sửa kéo dài thoải mái + đếm ký tự 0/500 */}
+            <div className="flex-1 min-w-[280px] sm:min-w-[400px] w-full relative">
               <input
                 type="text"
                 maxLength={500}
                 value={editRequestText}
                 onChange={(e) => setEditRequestText(e.target.value)}
                 placeholder={`Nhập yêu cầu chỉnh sửa cho ${selectedPhotoIds.length} ảnh...`}
-                className="w-full text-xs sm:text-sm rounded-lg sm:rounded-full pl-4 pr-14 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-[#a67c37] focus:bg-white dark:focus:bg-slate-800 transition-colors"
+                className="w-full text-xs sm:text-sm rounded-lg sm:rounded-full pl-4 pr-16 py-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-hidden focus:border-[#a67c37] focus:bg-white dark:focus:bg-slate-800 transition-colors"
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-medium text-slate-400 pointer-events-none">
                 {editRequestText.length}/500
               </span>
             </div>
 
-            {/* Phải: Nút GỬI YÊU CẦU CHỈNH SỬA */}
-            <button
-              type="button"
-              onClick={handleSubmitBatchRequest}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl sm:rounded-full bg-[#a67c37] hover:bg-[#8f692b] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex-shrink-0 text-center"
-            >
-              GỬI YÊU CẦU CHỈNH SỬA
-            </button>
+            {/* Phải: Cụm nút HỦY YÊU CẦU & GỬI YÊU CẦU CHỈNH SỬA */}
+            <div className="flex items-center gap-2.5 w-full sm:w-auto flex-shrink-0">
+              <button
+                type="button"
+                onClick={handleBatchCancelRequest}
+                title="Hủy yêu cầu cho các ảnh đã chọn (chuyển về trạng thái bình thường)"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl sm:rounded-full bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-300 border border-rose-200 dark:border-rose-800 font-bold text-xs uppercase tracking-wider shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+              >
+                <Icon icon="heroicons-outline:x-circle" className="w-4 h-4 text-rose-500" />
+                <span>HỦY YÊU CẦU</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmitBatchRequest}
+                className="w-full sm:w-auto px-5 sm:px-6 py-2.5 rounded-xl sm:rounded-full bg-[#a67c37] hover:bg-[#8f692b] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all text-center cursor-pointer whitespace-nowrap"
+              >
+                GỬI YÊU CẦU CHỈNH SỬA
+              </button>
+            </div>
           </div>
         </aside>
       </main>
@@ -1559,6 +1827,15 @@ const AlbumDetail = () => {
               </div>
 
               <div className="flex items-center gap-2.5">
+                {lightboxPhoto.status === "requested" && (
+                  <Button
+                    text="Hủy Yêu Cầu"
+                    className="!bg-rose-600 hover:!bg-rose-700 !text-white !rounded-xl text-xs px-4 py-2"
+                    onClick={(e) => {
+                      handleCancelRequest(e, lightboxPhoto.id);
+                    }}
+                  />
+                )}
                 <Button
                   text={
                     selectedPhotoIds.includes(lightboxPhoto.id)
