@@ -37,8 +37,40 @@
   - **request-manager:** Xây dựng `src/api/core/contactApi.js` (`submitContactInquiryApi`, `getContactOfficeInfoApi`) sử dụng `callApi` với `showOverlay: true`; re-export tại `src/api/core/index.js`; bổ sung module xử lý backend tại `server/src/modules/contact/` (`contact.service.js`, `contact.controller.js`) và đăng ký trong `server/src/app.module.js`.
   - **seo-sge-master:** Thẻ H1 duy nhất "Liên hệ", khối Atomic Answer Hook 40–60 từ tối ưu trích xuất AI Overview / SGE, Title chuẩn, Meta Description 150–160 ký tự, Schema JSON-LD Structured Data `ContactPage` + `LocalBusiness`, Breadcrumb `Trang chủ > Liên hệ`.
   - **Giao diện 2 Cột Chuyên Nghiệp:** Cột trái chứa thông tin văn phòng SPINTX, chi nhánh, hotline 24/7, email, và bản đồ định vị Google Maps tương tác; Cột phải là Form điền thông tin tư vấn với bộ chọn mã vùng quốc gia (21 quốc gia, mặc định 🇻🇳 +84), định dạng số điện thoại thời gian thực, nút gửi trạng thái loading, và Popup Modal (Trial Success Modal) xác nhận tiếp nhận kèm mã vé hỗ trợ `SPX-xxxxxx`.
-  - **Điều Hướng & Routing:** Cập nhật mục "Liên hệ" trên Navbar (`Navbar.jsx`) và Footer (`Footer.jsx`, `data.js`) trỏ đến `/contact`, tự động kích hoạt trạng thái active cho cả `/contact` và `/lien-he`.
-- [x] Đã build thành công `npm run build` không lỗi (code 0).
+- [x] Xây dựng màn hình Lọc & Chi tiết Ảnh Album (`/album/:id` - AlbumDetail) chuẩn 1:1 theo 4 hình ảnh người dùng cung cấp:
+  - **Yêu cầu 1 (Trang Album sang Hình 2):** Khi nhấn vào bất kỳ ảnh/thẻ album nào trên trang `/album`, hệ thống điều hướng tức thì sang `/album/:id` hiển thị giao diện Hình 2 (Lưới ảnh tràn rộng đầy đủ, thanh bộ lọc phiên bản Ver 1 đến Ver 4+, ô tìm kiếm từ khóa, và thanh công cụ dính đáy).
+  - **Yêu cầu 2 (Hình 2 sang Hình 3 & Hình 1):** Khi nhấn vào ảnh bất kỳ trong lưới (ví dụ ảnh #6 `wedding_portrait_06.jpg`), hệ thống kích hoạt mở sidebar "CHI TIẾT ẢNH" (Hình 3) ở cột bên phải, chuyển đổi sang bố cục hoàn chỉnh của Hình 1 với thumbnail, thông số kỹ thuật, khối Yêu cầu hiện tại, Lịch sử chỉnh sửa và Bình luận tương tác.
+  - **Yêu cầu 3 (Cuộn trang & Sticky Sidebar Hình 4):** Khi cuộn trang xuống, sidebar "CHI TIẾT ẢNH" được ghim cố định (`position: sticky; top: 96px;`) trong khi lưới ảnh cưới (Hình 4) tiếp tục cuộn tự nhiên.
+  - **Tầng API chuẩn request-manager:** Bổ sung `getAlbumDetailApi`, `updatePhotoFeedbackApi`, `addPhotoCommentApi` trong `src/api/core/albumApi.js` sử dụng `callApi`.
+  - **Chuẩn SEO SGE:** Thẻ H1 duy nhất, Atomic Answer Hook 40–60 từ, ảnh có lazy loading, meta chuẩn.
+- [x] Nâng cấp & Tinh chỉnh màn hình Chi tiết Album (`/album/:id` - AlbumDetail) theo 4 yêu cầu mới:
+  - **Thanh nổi đáy đặc & nổi bật (Hình 1):** Nâng cấp thanh floating action bar đáy thành container đặc 100% (`bg-white dark:bg-slate-900`, `border-2 border-slate-200/90 dark:border-slate-700`, `shadow-[0_16px_45px_rgba(0,0,0,0.28)]`, `ring-1 ring-black/5 dark:ring-white/10`, `z-50`), loại bỏ hoàn toàn tính xuyên thấu để khi cuộn qua ảnh cưới không bị chìm hay lẫn màu.
+  - **Nút tròn chọn ảnh kính mờ tinh tế (Frosted Glass):** Thiết kế lại nút chọn ảnh thành dạng kính mờ thanh thoát (`bg-black/40 backdrop-blur-xs`, viền trắng mảnh sắc nét `border-[1.5px] border-white/90`, icon checkmark trắng có đổ bóng nhẹ); loại bỏ hoàn toàn cảm giác thô, dày cộp như miếng dán nhựa trước đó. Khi được chọn chuyển sang nền vàng đồng `#b38840` viền trắng và phát sáng, vừa đảm bảo tính nhận diện cao vừa giữ trọn vẻ đẹp nghệ thuật của bức ảnh cưới.
+  - **Bổ sung các trường chi tiết Cột Phải (Hình 3):**
+    - Nút `[::] Ảnh Liên Quan` ở header với icon dạng lưới 4 ô.
+    - Card `YÊU CẦU CHỈNH SỬA ẢNH` với icon chỉnh sửa, nút tròn `(+)` màu vàng đồng, khung hiển thị thumbnail, `Version X` và badge trạng thái `Đang chờ xử lý`.
+    - Card `BÌNH LUẬN` với icon hội thoại, badge đếm số lượng, trạng thái rỗng "Chưa có bình luận nào cho ảnh này.", `textarea` nhập bình luận và nút `Gửi`.
+  - **Bộ lọc phiên bản mới:** Đổi tab `Ver 4+` thành `Ver 4 (5)`, đồng thời bổ sung thêm tab `Ver 5+ (2)` và cập nhật bộ lọc `filteredPhotos` tương ứng.
+- [x] Nâng cấp & Hoán đổi Banner theo yêu cầu người dùng:
+  - **Trang Danh Sách Album (`/album` - Album.jsx):** Khôi phục nguyên vẹn **Banner Dải Cuộn Phim Âm Bản 35mm Tuần Hoàn (35mm Film Reel Marquee Loop)** 10 khung hình cưới thật chạy liên tục 60fps kèm hiệu ứng dừng khi rê chuột, nền làm mờ bokeh và thông số Kodak Portra cổ điển.
+- [x] Tinh chỉnh Banner Chi Tiết Album (`/album/:id` - AlbumDetail.jsx) theo yêu cầu:
+  - **Bỏ nội dung trong 3 hình:**
+    - Loại bỏ khối tiêu đề (pill `• Bộ Sưu Tập Ảnh Cưới Chọn Lọc`, tiêu đề lớn `Lễ Cưới Thắng & Ngân`, đoạn mô tả) ở giao diện trực quan, đồng thời duy trì thẻ `<h1 className="sr-only">` và đoạn mô tả ẩn cho screen readers & Google AI SGE theo chuẩn SEO.
+    - Loại bỏ cụm 3 badge tính năng (`120 Ảnh Đẹp`, `4K Ultra-HD`, `Ver 1 – Ver 5+`).
+    - Loại bỏ huy hiệu tròn nổi `120 TỔNG ẢNH 4K ULTRA-HD`.
+  - **Áp dụng nền hình học vát chéo ấm cúng (Warm Geometric Backdrop) & Dịch phải cụm lục giác:**
+    - Khôi phục cấu trúc hình nền hình học vát chéo nghệ thuật ("giống khi nãy"): đa giác cắt chéo `polygon(0 0, 100% 0, 75% 100%, 0% 100%)`, đường chỉ vát chéo sắc nét, lưới dot-matrix và đốm sáng cinema ambient.
+    - Áp dụng hệ màu sắc ấm đồng điệu trang chủ ("màu sắc giống hiện tại"): tone kem cát - champagne ấm áp `#FAF8F5` đến `#EAE0CF` (Light mode) và slate sâu kết hợp vệt vàng kim (Dark mode), không dùng lặp lại ảnh `banner.jpg`.
+    - Dịch chuyển cụm 7 khung hình lục giác sang phía bên phải một tí (`lg:translate-x-16 xl:translate-x-24`), tạo bố cục hài hòa, cân đối với Breadcrumb bên trái.
+  - **Bảo toàn dải cuộn phim 35mm ở `/album`:** Trang danh sách album `/album` vẫn giữ nguyên 100% dải cuộn phim 35mm tuần hoàn.
+  - **Kiểm thử & Build:** Build `npm run build` thành công code 0, kiểm thử trực quan bằng Browser Subagent xác nhận Light Mode, Dark Mode và các hiệu ứng tương tác hoàn hảo.
+- [x] Tích hợp Hiệu Ứng Hạt Phát Sáng (Particle Effect & Cinema Grain) cho tất cả các Banner khi ở Chế độ Tối (Dark Mode):
+  - Xây dựng component `ParticlesEffect.jsx` tại `src/components/ui/` tích hợp Canvas 60fps vẽ các hạt bụi vàng kim lơ lửng, nhấp nháy êm ái cùng lớp phủ film grain nhiễu vi mô điện ảnh.
+  - Tích hợp đồng bộ vào tất cả các Banner: Hero Banner Trang Chủ (`Home.jsx`), Banner Quản lý Album (`Home.jsx`), Banner Dải cuộn phim 35mm (`Album.jsx`), Banner Cụm ảnh lục giác tổ ong (`AlbumDetail.jsx`).
+  - Tự động kích hoạt khi chuyển sang Dark Mode và ẩn hoàn toàn khi ở Light Mode để bảo toàn hiệu năng.
+  - Kiểm thử trực quan trên toàn bộ các trang với kết quả hiển thị mượt mà, tinh tế và sang trọng.
 
 ## 2. Kế hoạch tiếp theo
-- Mở rộng các chức năng chỉnh sửa và chia sẻ album trực tiếp cho studio và khách hàng.
+- Mở rộng các tính năng chỉnh sửa chuyên sâu và export album cho studio.
+
+

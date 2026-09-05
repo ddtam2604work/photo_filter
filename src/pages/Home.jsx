@@ -3,6 +3,7 @@ import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import Icon from "@/components/ui/Icon";
 import Modal from "@/components/ui/Modal";
+import ParticlesEffect from "@/components/ui/ParticlesEffect";
 import Navbar from "@/components/partials/header/Navbar";
 import Footer from "@/components/partials/footer/Footer";
 
@@ -62,6 +63,9 @@ const Home = () => {
           />
           {/* Soft ambient overlay for contrast and luxury warmth */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#FAF8F5]/30 via-[#FAF8F5]/20 to-[#FAF8F5]/90 dark:from-slate-900/60 dark:via-slate-900/40 dark:to-slate-900/90 pointer-events-none" />
+
+          {/* Hiệu ứng hạt phát sáng & Grain cinema khi ở chế độ Dark Mode */}
+          <ParticlesEffect particleCount={65} />
 
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             {/* Primary SEO Heading (H1) matching Hình 2 */}
@@ -358,6 +362,9 @@ const Home = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/30" />
               </div>
+
+              {/* Hiệu ứng hạt phát sáng & Grain cinema khi ở chế độ Dark Mode */}
+              <ParticlesEffect particleCount={35} />
 
               {/* Foreground Center Card */}
               <div className="relative z-10 max-w-3xl mx-auto text-center space-y-6 text-white">

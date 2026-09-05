@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/partials/header/Navbar";
 import Footer from "@/components/partials/footer/Footer";
 import Card from "@/components/ui/Card";
@@ -7,6 +8,7 @@ import Textinput from "@/components/ui/Textinput";
 import Icon from "@/components/ui/Icon";
 import Modal from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
+import ParticlesEffect from "@/components/ui/ParticlesEffect";
 import { toast } from "react-toastify";
 import { getAlbumListApi } from "@/api/core/albumApi";
 
@@ -330,7 +332,157 @@ const FILM_REEL_FRAMES = [
 // Nhân bản 2 bộ để tạo vòng lặp cuộn film liên tục vô tận không giật (Seamless Infinite Marquee Loop)
 const INFINITE_FILM_FRAMES = [...FILM_REEL_FRAMES, ...FILM_REEL_FRAMES];
 
+// Dữ liệu 7 khung hình lục giác tổ ong (Hexagonal Honeycomb) cho Banner theo thiết kế mẫu
+const HONEYCOMB_ITEMS = [
+  // 0. Lục giác lớn chủ đạo bên trái (Main Featured Hexagon)
+  {
+    id: "hex-main",
+    title: "Khoảnh khắc kiêu sa",
+    subtitle: "Dinh thự cổ điển",
+    image: "/images/wedding_portrait_06.jpg",
+    category: "Lễ cưới",
+    isMain: true,
+  },
+  // 1. Hàng trên - giữa
+  {
+    id: "hex-1",
+    title: "Hồ xanh & Nắng chiều",
+    subtitle: "Ngoại cảnh ven hồ",
+    image: "/images/wedding_portrait_08.jpg",
+    category: "Pre-wedding",
+  },
+  // 2. Hàng trên - phải
+  {
+    id: "hex-2",
+    title: "Bờ biển hoàng hôn",
+    subtitle: "Hoàng hôn lãng mạn",
+    image: "/images/gallery_beach.jpg",
+    category: "Ngoại cảnh",
+  },
+  // 3. Hàng giữa - tâm
+  {
+    id: "hex-3",
+    title: "Nụ cười rạng rỡ",
+    subtitle: "Hạnh phúc ngập tràn",
+    image: "/images/wedding_laughing_bride.jpg",
+    category: "Lễ vu quy",
+  },
+  // 4. Hàng giữa - phải
+  {
+    id: "hex-4",
+    title: "Xe mui trần cổ điển",
+    subtitle: "Retro Vintage",
+    image: "/images/gallery_car.jpg",
+    category: "Pre-wedding",
+  },
+  // 5. Hàng dưới - giữa
+  {
+    id: "hex-5",
+    title: "Nghi lễ gia tiên",
+    subtitle: "Áo dài truyền thống",
+    image: "/images/wedding_portrait_01.jpg",
+    category: "Lễ vu quy",
+  },
+  // 6. Hàng dưới - phải
+  {
+    id: "hex-6",
+    title: "Đồi thông sương mờ",
+    subtitle: "Đà Lạt thơ mộng",
+    image: "/images/wedding_horse_mist.jpg",
+    category: "Ngoại cảnh",
+  },
+];
+
+// Cấu hình tỷ lệ & tọa độ chuẩn toán học cho cụm lục giác tổ ong
+const HEXAGON_CONFIGS = [
+  // 0. Main Hexagon (Large, Left)
+  {
+    index: 0,
+    style: {
+      left: "1%",
+      top: "14%",
+      width: "38%",
+      height: "72%",
+      zIndex: 15,
+    },
+    borderClass: "p-1.5 sm:p-2.5",
+  },
+  // 1. Top - Mid
+  {
+    index: 1,
+    style: {
+      left: "38.5%",
+      top: "2.5%",
+      width: "21.5%",
+      height: "38%",
+      zIndex: 12,
+    },
+    borderClass: "p-1 sm:p-1.5",
+  },
+  // 2. Top - Right
+  {
+    index: 2,
+    style: {
+      left: "60.5%",
+      top: "2.5%",
+      width: "21.5%",
+      height: "38%",
+      zIndex: 12,
+    },
+    borderClass: "p-1 sm:p-1.5",
+  },
+  // 3. Mid - Center
+  {
+    index: 3,
+    style: {
+      left: "49.5%",
+      top: "31%",
+      width: "21.5%",
+      height: "38%",
+      zIndex: 14,
+    },
+    borderClass: "p-1 sm:p-1.5",
+  },
+  // 4. Mid - Right
+  {
+    index: 4,
+    style: {
+      left: "71.5%",
+      top: "31%",
+      width: "21.5%",
+      height: "38%",
+      zIndex: 14,
+    },
+    borderClass: "p-1 sm:p-1.5",
+  },
+  // 5. Bottom - Mid
+  {
+    index: 5,
+    style: {
+      left: "38.5%",
+      top: "59.5%",
+      width: "21.5%",
+      height: "38%",
+      zIndex: 12,
+    },
+    borderClass: "p-1 sm:p-1.5",
+  },
+  // 6. Bottom - Right
+  {
+    index: 6,
+    style: {
+      left: "60.5%",
+      top: "59.5%",
+      width: "21.5%",
+      height: "38%",
+      zIndex: 12,
+    },
+    borderClass: "p-1 sm:p-1.5",
+  },
+];
+
 const Album = () => {
+  const navigate = useNavigate();
   const [albums, setAlbums] = useState(INITIAL_ALBUMS);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
@@ -415,6 +567,9 @@ const Album = () => {
 
       <main className="flex-grow pt-16 sm:pt-20 pb-16">
         {/* ========================================================================= */}
+        {/* 2. BANNER & BREADCRUMB SECTION (HIỆU ỨNG LỤC GIÁC TỔ ONG - HEXAGONAL HONEYCOMB) */}
+        {/* ========================================================================= */}
+        {/* ========================================================================= */}
         {/* 2. BANNER & BREADCRUMB SECTION (DẢI CUỘN FILM 10 TẤM TỰ ĐỘNG + NỀN MỜ) */}
         {/* ========================================================================= */}
         <section
@@ -433,6 +588,9 @@ const Album = () => {
 
           {/* Vệt sáng ấm phim ảnh cổ điển (Ambient Warm Film Flare) */}
           <div className="absolute -top-16 -right-16 w-96 h-96 bg-amber-400/20 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Hiệu ứng hạt phát sáng & Grain cinema khi ở chế độ Dark Mode */}
+          <ParticlesEffect particleCount={55} />
 
           {/* Banner Container: Bố cục 2 cột hài hòa, chuyên nghiệp trên desktop */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -522,7 +680,7 @@ const Album = () => {
 
                             {/* KHUNG CHỨA ẢNH THẬT */}
                             <div
-                              onClick={() => setSelectedAlbum(frame)}
+                              onClick={() => navigate(`/album/${frame.id}`)}
                               className="group/frame relative aspect-[3/4] bg-black overflow-hidden cursor-pointer mx-1.5 my-1 rounded-xs border border-white/10 hover:border-amber-400 transition-all duration-300"
                             >
                               <img
@@ -735,7 +893,7 @@ const Album = () => {
               {filteredAlbums.map((item) => (
                 <div
                   key={item.id}
-                  onClick={() => setSelectedAlbum(item)}
+                  onClick={() => navigate(`/album/${item.id}`)}
                   className="group cursor-pointer"
                 >
                   <Card
@@ -819,7 +977,7 @@ const Album = () => {
               {filteredAlbums.map((item) => (
                 <div
                   key={item.id}
-                  onClick={() => setSelectedAlbum(item)}
+                  onClick={() => navigate(`/album/${item.id}`)}
                   className="group cursor-pointer"
                 >
                   <Card
@@ -916,7 +1074,7 @@ const Album = () => {
                 text="Mở toàn bộ ảnh"
                 className="!bg-[#A67C37] !text-white !rounded-xl text-xs px-5 py-2.5"
                 onClick={() => {
-                  toast.info(`Đang mở kho ảnh của "${selectedAlbum?.title}"!`);
+                  navigate(`/album/${selectedAlbum?.id || 1}`);
                 }}
               />
             </div>

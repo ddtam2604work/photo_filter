@@ -34,3 +34,25 @@ export const createAlbumApi = (data) =>
  */
 export const toggleFavoritePhotoApi = (data) =>
   callApi.post("/api/v1/albums/danh-dau-anh", data, { showOverlay: true });
+
+/**
+ * Lấy chi tiết album bao gồm danh sách ảnh và lịch sử phiên bản
+ * @param {string|number} albumId
+ */
+export const getAlbumDetailApi = (albumId) =>
+  callApi.get(`/api/v1/albums/chi-tiet/${albumId}`, {}, { showOverlay: false });
+
+/**
+ * Gửi yêu cầu chỉnh sửa cho danh sách ảnh đã chọn
+ * @param {{ album_id: string|number, photo_ids: Array<string|number>, yeu_cau: string }} data
+ */
+export const updatePhotoFeedbackApi = (data) =>
+  callApi.post("/api/v1/albums/gui-yeu-cau-chinh-sua", data, { showOverlay: true });
+
+/**
+ * Thêm bình luận cho một bức ảnh cụ thể
+ * @param {{ photo_id: string|number, noi_dung: string, nguoi_gui?: string }} data
+ */
+export const addPhotoCommentApi = (data) =>
+  callApi.post("/api/v1/albums/binh-luan-anh", data, { showOverlay: true });
+

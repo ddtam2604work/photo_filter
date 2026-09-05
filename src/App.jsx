@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 const Home = lazy(() => import("@/pages/Home"));
 const Album = lazy(() => import("@/pages/Album"));
+const AlbumDetail = lazy(() => import("@/pages/AlbumDetail"));
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/album" element={<Album />} />
+          <Route path="/album/:id" element={<AlbumDetail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
