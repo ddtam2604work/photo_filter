@@ -70,6 +70,15 @@
   - Tự động kích hoạt khi chuyển sang Dark Mode và ẩn hoàn toàn khi ở Light Mode để bảo toàn hiệu năng.
   - Kiểm thử trực quan trên toàn bộ các trang với kết quả hiển thị mượt mà, tinh tế và sang trọng.
 
+- [x] Nâng cấp Bố Cục Banner Chi Tiết Album (`/album/:id` - AlbumDetail.jsx) thành 2 Cột Cân Đối:
+  - **Cột Phải:** Đưa toàn bộ cụm 7 khung hình lục giác tổ ong sang bên phải (`lg:col-span-7 flex justify-end`), căn lề chuẩn xác, giữ nguyên các hiệu ứng tương tác hover phóng to, lớp phủ thông tin và điều hướng mở chi tiết ảnh.
+  - **Cột Trái:** Bổ sung khối thông điệp & slogan sang trọng thể hiện sự **chuyên nghiệp & tận tâm**:
+    - Eyebrow pill: `• TẬN TÂM TRONG TỪNG KHOẢNH KHẮC` với điểm nháy animation pulse màu vàng đồng.
+    - Slogan chính nghệ thuật: *"Tận tâm trong từng khung hình, hoàn mỹ từng câu chuyện tình yêu."* với vệt chuyển sắc vàng champagne kim loại.
+    - Đoạn mô tả giàu cảm xúc về giá trị kỷ vật tình yêu và sự tỉ mỉ trong từng đường nét hậu kỳ.
+    - Bộ 3 thẻ cam kết uy tín (Trust Badges): `Hậu kỳ sắc nét 4K Ultra-HD`, `Lắng nghe & chỉnh sửa tận tâm 1:1`, `Lưu trữ & bảo toàn trọn đời`.
+  - **Xóa khoảng trắng phía sau Header:** Loại bỏ `pt-20 sm:pt-24` trên thẻ `<main>` và chuyển thành `pt-24 sm:pt-28 lg:pt-[118px]` trực tiếp trên `<section>` banner. Nhờ đó, nền gradient và họa tiết hình học của banner tràn lên tận đỉnh màn hình (`y = 0`) phía sau Header nổi, loại bỏ 100% vệt trắng mà không làm thay đổi bất kỳ khoảng cách hay bố cục nào của breadcrumb, slogan và cụm ảnh.
+
 ## 2. Kế hoạch tiếp theo
 - Mở rộng các tính năng chỉnh sửa chuyên sâu và export album cho studio.
 

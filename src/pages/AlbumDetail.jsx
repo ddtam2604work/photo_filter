@@ -682,13 +682,13 @@ const AlbumDetail = () => {
         </p>
       </div>
 
-      <main className="flex-grow pt-20 sm:pt-24">
+      <main className="flex-grow">
         {/* ========================================================================= */}
         {/* 2. TOP HERO BANNER: CỤM ẢNH LỤC GIÁC TỔ ONG (NỀN HÌNH HỌC ẤM CÚNG)       */}
         {/* ========================================================================= */}
         <section
           aria-label="Album Detail Honeycomb Banner"
-          className="relative w-full border-b border-slate-200/80 dark:border-slate-800 pt-5 pb-8 sm:pt-6 sm:pb-10 lg:pt-7 lg:pb-12 bg-gradient-to-br from-[#FAF8F5] via-[#F5EFE6] to-[#EAE0CF] dark:from-[#090f18] dark:via-[#0e1726] dark:to-[#152236] text-slate-800 dark:text-white overflow-hidden select-none transition-colors duration-300"
+          className="relative w-full border-b border-slate-200/80 dark:border-slate-800 pt-24 sm:pt-28 lg:pt-[118px] pb-8 sm:pb-10 lg:pb-12 bg-gradient-to-br from-[#FAF8F5] via-[#F5EFE6] to-[#EAE0CF] dark:from-[#090f18] dark:via-[#0e1726] dark:to-[#152236] text-slate-800 dark:text-white overflow-hidden select-none transition-colors duration-300"
         >
           {/* LỚP NỀN HÌNH HỌC VÁT CHÉO (ANGLED GEOMETRIC BACKDROP) PHỐI MÀU WARM LUXURY */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -743,63 +743,104 @@ const AlbumDetail = () => {
               Bộ sưu tập 120 bức ảnh cưới của Thắng và Ngân với chế độ lọc phiên bản từ Ver 1 đến Ver 5+, đánh dấu chỉnh sửa và phản hồi tương tác theo thời gian thực.
             </p>
 
-            {/* CỤM TỔ ONG LỤC GIÁC 7 KHUNG HÌNH (DỊCH CHUYỂN VỀ BÊN PHẢI MỘT TÍ) */}
-            <div className="flex justify-center items-center py-2 sm:py-3 transform lg:translate-x-16 xl:translate-x-24">
-              <div className="relative w-full max-w-[620px] sm:max-w-[720px] lg:max-w-[780px] aspect-[16/10.2] sm:aspect-[16/9.8] select-none">
-                {/* Render 7 Khung Hình Lục Giác Xếp So Le Chuẩn Tỷ Lệ */}
-                {HEXAGON_CONFIGS.map((cfg) => {
-                  const item = HONEYCOMB_ITEMS[cfg.index];
-                  return (
-                    <div
-                      key={item.id}
-                      className="absolute transition-all duration-400 ease-out hover:scale-108 hover:-translate-y-2 hover:z-30 cursor-pointer group"
-                      style={{
-                        ...cfg.style,
-                        filter: "drop-shadow(0 14px 28px rgba(0,0,0,0.16))",
-                      }}
-                      onClick={() => {
-                        const targetPhoto = photos.find((p) => p.id === item.photoId);
-                        if (targetPhoto) {
-                          setActivePhoto(targetPhoto);
-                          toast.info(`Đang xem chi tiết ảnh: "${targetPhoto.filename}"`);
-                        }
-                      }}
-                      title={`Xem chi tiết "${item.title}"`}
-                    >
-                      {/* Lớp vỏ lục giác màu trắng viền sắc nét nổi bật trên nền ấm */}
+            {/* BỐ CỤC 2 CỘT: SLOGAN CHUYÊN NGHIỆP & TẬN TÂM BÊN TRÁI, CỤM LỤC GIÁC TỔ ONG VỀ BÊN PHẢI */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 xl:gap-12 items-center py-2 sm:py-3">
+              {/* CỘT TRÁI: SLOGAN THỂ HIỆN SỰ CHUYÊN NGHIỆP & TẬN TÂM */}
+              <div className="lg:col-span-5 flex flex-col justify-center space-y-3.5 sm:space-y-4">
+                {/* Eyebrow Badge */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wide bg-[#a67c37]/10 dark:bg-amber-400/10 text-[#a67c37] dark:text-amber-300 border border-[#a67c37]/25 dark:border-amber-400/25 shadow-xs w-fit">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#a67c37] dark:bg-amber-400 animate-pulse" />
+                  <span>TẬN TÂM TRONG TỪNG KHOẢNH KHẮC</span>
+                </div>
+
+                {/* Slogan Chính */}
+                <h2 className="text-2xl sm:text-3xl lg:text-[34px] xl:text-4xl font-serif font-bold text-slate-900 dark:text-white leading-[1.25] tracking-tight">
+                  Tận tâm trong từng khung hình,{" "}
+                  <span className="bg-gradient-to-r from-[#a67c37] via-[#c49746] to-[#8c6224] dark:from-amber-300 dark:via-amber-200 dark:to-yellow-400 bg-clip-text text-transparent">
+                    hoàn mỹ từng câu chuyện tình yêu.
+                  </span>
+                </h2>
+
+                {/* Mô tả biểu cảm sâu sắc & cam kết chất lượng */}
+                <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                  Mỗi bức ảnh cưới là một chứng nhân vô giá cho ngày hạnh phúc. Bằng kỹ thuật hậu kỳ chuẩn mực và sự tận tụy lắng nghe, PhotoFlow cùng bạn nâng niu và hoàn thiện trọn vẹn từng khoảnh khắc thiêng liêng nhất.
+                </p>
+
+                {/* 3 Cam kết cốt lõi: Chuyên nghiệp & Tận tâm */}
+                <div className="pt-1 flex flex-wrap gap-2.5 sm:gap-3">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs text-xs font-medium text-slate-700 dark:text-slate-200 backdrop-blur-xs">
+                    <Icon icon="heroicons-outline:sparkles" className="w-4 h-4 text-[#a67c37] dark:text-amber-400" />
+                    <span>Hậu kỳ sắc nét 4K Ultra-HD</span>
+                  </div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs text-xs font-medium text-slate-700 dark:text-slate-200 backdrop-blur-xs">
+                    <Icon icon="heroicons-outline:heart" className="w-4 h-4 text-[#a67c37] dark:text-amber-400" />
+                    <span>Lắng nghe &amp; chỉnh sửa tận tâm 1:1</span>
+                  </div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/70 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80 shadow-xs text-xs font-medium text-slate-700 dark:text-slate-200 backdrop-blur-xs">
+                    <Icon icon="heroicons-outline:shield-check" className="w-4 h-4 text-[#a67c37] dark:text-amber-400" />
+                    <span>Lưu trữ &amp; bảo toàn trọn đời</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CỘT PHẢI: CỤM TỔ ONG LỤC GIÁC 7 KHUNG HÌNH (ĐƯA VỀ BÊN PHẢI) */}
+              <div className="lg:col-span-7 flex justify-center lg:justify-end items-center">
+                <div className="relative w-full max-w-[560px] sm:max-w-[640px] lg:max-w-[680px] xl:max-w-[720px] aspect-[16/10.2] sm:aspect-[16/9.8] select-none">
+                  {/* Render 7 Khung Hình Lục Giác Xếp So Le Chuẩn Tỷ Lệ */}
+                  {HEXAGON_CONFIGS.map((cfg) => {
+                    const item = HONEYCOMB_ITEMS[cfg.index];
+                    return (
                       <div
-                        className={`w-full h-full bg-white dark:bg-slate-800 ${cfg.borderClass} shadow-md transition-colors`}
+                        key={item.id}
+                        className="absolute transition-all duration-400 ease-out hover:scale-108 hover:-translate-y-2 hover:z-30 cursor-pointer group"
                         style={{
-                          clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+                          ...cfg.style,
+                          filter: "drop-shadow(0 14px 28px rgba(0,0,0,0.16))",
                         }}
+                        onClick={() => {
+                          const targetPhoto = photos.find((p) => p.id === item.photoId);
+                          if (targetPhoto) {
+                            setActivePhoto(targetPhoto);
+                            toast.info(`Đang xem chi tiết ảnh: "${targetPhoto.filename}"`);
+                          }
+                        }}
+                        title={`Xem chi tiết "${item.title}"`}
                       >
-                        {/* Lớp ruột lục giác chứa ảnh */}
+                        {/* Lớp vỏ lục giác màu trắng viền sắc nét nổi bật trên nền ấm */}
                         <div
-                          className="w-full h-full relative overflow-hidden bg-slate-100 dark:bg-slate-800"
+                          className={`w-full h-full bg-white dark:bg-slate-800 ${cfg.borderClass} shadow-md transition-colors`}
                           style={{
                             clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
                           }}
                         >
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            loading="lazy"
-                            className="w-full h-full object-cover filter contrast-[1.03] transition-transform duration-700 ease-out group-hover:scale-115"
-                          />
-                          {/* Lớp phủ chuyển màu & tên ảnh khi rê chuột */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end items-center pb-2.5 sm:pb-3.5 px-2 text-center pointer-events-none">
-                            <span className="text-[9px] sm:text-[11px] font-bold text-white leading-tight drop-shadow">
-                              {item.title}
-                            </span>
-                            <span className="text-[7.5px] sm:text-[9px] text-amber-300 font-medium mt-0.5">
-                              {item.category}
-                            </span>
+                          {/* Lớp ruột lục giác chứa ảnh */}
+                          <div
+                            className="w-full h-full relative overflow-hidden bg-slate-100 dark:bg-slate-800"
+                            style={{
+                              clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+                            }}
+                          >
+                            <img
+                              src={item.image}
+                              alt={item.title}
+                              loading="lazy"
+                              className="w-full h-full object-cover filter contrast-[1.03] transition-transform duration-700 ease-out group-hover:scale-115"
+                            />
+                            {/* Lớp phủ chuyển màu & tên ảnh khi rê chuột */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end items-center pb-2.5 sm:pb-3.5 px-2 text-center pointer-events-none">
+                              <span className="text-[9px] sm:text-[11px] font-bold text-white leading-tight drop-shadow">
+                                {item.title}
+                              </span>
+                              <span className="text-[7.5px] sm:text-[9px] text-amber-300 font-medium mt-0.5">
+                                {item.category}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
