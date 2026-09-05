@@ -10,6 +10,7 @@ import Badge from "@/components/ui/Badge";
 import Breadcrumb from "@/components/ui/Breadcrumb";
 import Modal from "@/components/ui/Modal";
 import ParticlesEffect from "@/components/ui/ParticlesEffect";
+import ImageAdapter from "@/components/ui/ImageAdapter";
 import { toast } from "react-toastify";
 import {
   getAlbumDetailApi,
@@ -596,49 +597,6 @@ const AlbumDetail = () => {
     ? `Ver ${currentActiveVerNum} (${countForCurrentVer})`
     : `Ver 5 (${photos.filter((p) => p.versionNum === 5).length})`;
 
-  // Mở lightbox xem ảnh phóng to từ icon góc dưới bên trái của thẻ
-  const handleOpenLightbox = (e, photo) => {
-    e.stopPropagation();
-    setLightboxPhoto(photo);
-  };
-
-  // Chuyển ảnh trước/sau trong Lightbox Modal
-  const handleLightboxPrev = () => {
-    if (!lightboxPhoto) return;
-    const currentIndex = filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id);
-    const prevIndex = (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
-    setLightboxPhoto(filteredPhotos[prevIndex]);
-  };
-
-  const handleLightboxNext = () => {
-    if (!lightboxPhoto) return;
-    const currentIndex = filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id);
-    const nextIndex = (currentIndex + 1) % filteredPhotos.length;
-    setLightboxPhoto(filteredPhotos[nextIndex]);
-  };
-
-  // Gọi API lấy dữ liệu album theo chuẩn request-manager skill
-  useEffect(() => {
-    let isMounted = true;
-    const fetchDetail = async () => {
-      try {
-        const res = await getAlbumDetailApi(id || 1);
-        if (res && res.data && isMounted) {
-          // Khi có API backend trả về danh sách ảnh
-          if (Array.isArray(res.data.photos)) {
-            setPhotos(res.data.photos);
-          }
-        }
-      } catch (err) {
-        // Fallback sử dụng mock photos
-      }
-    };
-    fetchDetail();
-    return () => {
-      isMounted = false;
-    };
-  }, [id]);
-
   // Bộ lọc ảnh theo tab và từ khóa
   const filteredPhotos = useMemo(() => {
     return photos.filter((item) => {
@@ -663,6 +621,97 @@ const AlbumDetail = () => {
       return matchVersion && matchSearch;
     });
   }, [photos, activeVersionFilter, searchQuery]);
+
+  // Mở lightbox xem ảnh phóng to từ icon góc dưới bên trái của thẻ
+  const handleOpenLightbox = (e, photo) => {
+    e.stopPropagation();
+    setLightboxPhoto(photo);
+  };
+
+  // Chuyển ảnh trước/sau trong Lightbox Modal
+  const handleLightboxPrev = () => {
+    if (!lightboxPhoto) return;
+    const currentIndex = filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id);
+    const prevIndex = (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+    setLightboxPhoto(filteredPhotos[prevIndex]);
+  };
+
+  const handleLightboxNext = () => {
+    if (!lightboxPhoto) return;
+    const currentIndex = filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id);
+    const nextIndex = (currentIndex + 1) % filteredPhotos.length;
+    setLightboxPhoto(filteredPhotos[nextIndex]);
+  };
+
+  // Trạng thái toàn màn hình trình duyệt (Native Browser Fullscreen)
+  const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsNativeFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  const toggleNativeFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+  };
+
+  // Lắng nghe phím tắt điều hướng toàn màn hình (Escape để đóng, ArrowLeft/ArrowRight để lùi/tiến ảnh)
+  useEffect(() => {
+    if (!lightboxPhoto) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setLightboxPhoto(null);
+      } else if (e.key === "ArrowLeft") {
+        handleLightboxPrev();
+      } else if (e.key === "ArrowRight") {
+        handleLightboxNext();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [lightboxPhoto, filteredPhotos]);
+
+  // Gọi API lấy dữ liệu album theo chuẩn request-manager skill
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDetail = async () => {
+      try {
+        const res = await getAlbumDetailApi(id || 1);
+        if (res && res.data && isMounted) {
+          // Khi có API backend trả về danh sách ảnh
+          if (Array.isArray(res.data.photos)) {
+            setPhotos(res.data.photos);
+          }
+        }
+      } catch (err) {
+        // Fallback sử dụng mock photos
+      }
+    };
+    fetchDetail();
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
   // Xử lý chọn / bỏ chọn một ảnh
   const handleToggleSelectPhoto = (e, photoId) => {
@@ -1034,7 +1083,7 @@ const AlbumDetail = () => {
                               clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
                             }}
                           >
-                            <img
+                            <ImageAdapter
                               src={item.image}
                               alt={item.title}
                               loading="lazy"
@@ -1340,8 +1389,8 @@ const AlbumDetail = () => {
                             : "border border-slate-200/70 dark:border-slate-700/60"
                         }`}
                       >
-                        {/* Ảnh thực tế */}
-                        <img
+                        {/* Ảnh thực tế với ImageAdapter (hỗ trợ cả ảnh tải lên và ảnh link) */}
+                        <ImageAdapter
                           src={photo.src}
                           alt={photo.filename}
                           loading="lazy"
@@ -1436,7 +1485,7 @@ const AlbumDetail = () => {
                         }`}
                       >
                         <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700 relative group/thumb">
-                          <img
+                          <ImageAdapter
                             src={photo.src}
                             alt={photo.filename}
                             className="w-full h-full object-cover"
@@ -1582,7 +1631,7 @@ const AlbumDetail = () => {
                   {/* Khung hiển thị Version & Trạng thái chuẩn 1:1 theo Hình 3 */}
                   <div className="rounded-xl border border-slate-200 dark:border-slate-700/80 p-3 bg-white dark:bg-slate-800 flex items-center gap-3.5 shadow-2xs">
                     <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600">
-                      <img
+                      <ImageAdapter
                         src={activePhoto.src}
                         alt={activePhoto.filename}
                         className="w-full h-full object-cover"
@@ -1767,52 +1816,24 @@ const AlbumDetail = () => {
       {/* 7. Footer SpintX */}
       <Footer />
 
-      {/* 8. Lightbox Preview Modal xem ảnh 4K phóng to khi nhấn icon ở góc dưới bên trái thẻ */}
+      {/* 8. Fullscreen Image Viewer: Phóng to cả màn hình khi nhấn biểu tượng như Hình 1 */}
       {lightboxPhoto && (
-        <Modal
-          activeModal={Boolean(lightboxPhoto)}
-          onClose={() => setLightboxPhoto(null)}
-          title={lightboxPhoto.filename}
-          className="max-w-4xl !p-0"
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Xem ảnh toàn màn hình: ${lightboxPhoto.filename}`}
+          className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-2xl flex flex-col justify-between select-none animate-fadeIn transition-all duration-300"
         >
-          <div className="p-4 sm:p-6 space-y-4">
-            <div className="relative rounded-2xl overflow-hidden max-h-[70vh] flex items-center justify-center bg-black/95">
-              <img
-                src={lightboxPhoto.src}
-                alt={lightboxPhoto.filename}
-                className="max-h-[70vh] w-auto rounded-xl object-contain shadow-2xl"
-              />
-              {/* Nút ảnh trước (<) */}
-              <button
-                type="button"
-                onClick={handleLightboxPrev}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/20 hover:border-amber-400 transition-colors cursor-pointer shadow-lg"
-                title="Ảnh trước (<)"
-              >
-                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              {/* Nút ảnh tiếp theo (>) */}
-              <button
-                type="button"
-                onClick={handleLightboxNext}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/20 hover:border-amber-400 transition-colors cursor-pointer shadow-lg"
-                title="Ảnh tiếp theo (>)"
-              >
-                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-bold text-base text-slate-900 dark:text-white">
+          {/* HEADER BAR: Tên file, thông số kỹ thuật, counter, native fullscreen toggle & nút Đóng */}
+          <header className="px-4 py-3 sm:px-6 sm:py-3.5 flex items-center justify-between text-white border-b border-white/10 bg-black/60 backdrop-blur-md z-30">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h3 className="font-bold text-sm sm:text-base text-white truncate max-w-[180px] sm:max-w-md">
                     {lightboxPhoto.filename}
-                  </h4>
-                  <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2 py-0.5 rounded">
+                  </h3>
+                  <span className="bg-white/15 text-white/90 text-xs font-semibold px-2 py-0.5 rounded">
                     {lightboxPhoto.version}
                   </span>
                   {lightboxPhoto.statusLabel && (
@@ -1821,48 +1842,135 @@ const AlbumDetail = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-400">
-                  Độ phân giải: {lightboxPhoto.dimensions} • Dung lượng: {lightboxPhoto.filesize}
+                <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 flex items-center gap-2 flex-wrap">
+                  <span>Độ phân giải: {lightboxPhoto.dimensions}</span>
+                  <span>•</span>
+                  <span>Dung lượng: {lightboxPhoto.filesize}</span>
+                  <span>•</span>
+                  <span className="text-amber-300 font-medium">
+                    Ảnh {filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id) + 1} / {filteredPhotos.length}
+                  </span>
                 </p>
               </div>
+            </div>
 
-              <div className="flex items-center gap-2.5">
-                {lightboxPhoto.status === "requested" && (
-                  <Button
-                    text="Hủy Yêu Cầu"
-                    className="!bg-rose-600 hover:!bg-rose-700 !text-white !rounded-xl text-xs px-4 py-2"
-                    onClick={(e) => {
-                      handleCancelRequest(e, lightboxPhoto.id);
-                    }}
-                  />
-                )}
-                <Button
-                  text={
-                    selectedPhotoIds.includes(lightboxPhoto.id)
-                      ? "✓ Đã chọn ảnh này"
-                      : "Chọn ảnh này"
-                  }
-                  className={`!text-xs px-4 py-2 !rounded-xl ${
-                    selectedPhotoIds.includes(lightboxPhoto.id)
-                      ? "!bg-[#b38840] !text-white"
-                      : "!bg-slate-100 dark:!bg-slate-700 !text-slate-700 dark:!text-slate-200 hover:!bg-slate-200"
-                  }`}
-                  onClick={() => {
-                    handleToggleSelectPhoto({ stopPropagation: () => {} }, lightboxPhoto.id);
-                  }}
-                />
-                <Button
-                  text="Chỉnh Sửa Ảnh Này"
-                  className="!bg-[#a67c37] !text-white !rounded-xl text-xs px-4 py-2"
-                  onClick={() => {
-                    setActivePhoto(lightboxPhoto);
-                    setLightboxPhoto(null);
-                  }}
-                />
-              </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Nút Toggle Fullscreen Browser */}
+              <button
+                type="button"
+                onClick={toggleNativeFullscreen}
+                title={isNativeFullscreen ? "Thu nhỏ màn hình" : "Toàn màn hình trình duyệt"}
+                className="p-2 sm:px-3 sm:py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white flex items-center gap-1.5 text-xs border border-white/15 transition-colors cursor-pointer"
+              >
+                <svg className="w-4 h-4 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                  {isNativeFullscreen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9H4m0 0v5m0-5l6 6m6-6h5m0 0v5m0-5l-6 6m0 6l6 6m0 0h-5m5 0v-5m-16 0v5m0 0h5m-5 0l6-6" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5m-6 6l-5 5m0 0h4m-4 0v-4m16 4v-4m0 4h-4" />
+                  )}
+                </svg>
+                <span className="hidden sm:inline">{isNativeFullscreen ? "Thu nhỏ" : "Toàn màn hình"}</span>
+              </button>
+
+              {/* Nút Đóng (ESC) */}
+              <button
+                type="button"
+                onClick={() => setLightboxPhoto(null)}
+                title="Đóng xem ảnh phóng to (Phím Esc)"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white/10 hover:bg-rose-600 text-white flex items-center justify-center border border-white/15 transition-all cursor-pointer hover:scale-105"
+              >
+                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          {/* MAIN VIEWER: PHÓNG TO CHIẾM TRỌN DIỆN TÍCH MÀN HÌNH */}
+          <div className="relative flex-1 w-full flex items-center justify-center p-2 sm:p-6 overflow-hidden">
+            <div className="relative w-full h-full flex items-center justify-center">
+              <ImageAdapter
+                src={lightboxPhoto.src}
+                alt={lightboxPhoto.filename}
+                className="max-w-full max-h-[82vh] w-auto h-auto object-contain select-none rounded-xl drop-shadow-[0_15px_35px_rgba(0,0,0,0.8)] transition-transform duration-300"
+              />
+
+              {/* Nút lùi ảnh trước (<) - Phím mũi tên Trái */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLightboxPrev();
+                }}
+                className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/25 hover:border-amber-400 hover:scale-110 backdrop-blur-md shadow-2xl transition-all cursor-pointer group/nav z-30"
+                title="Ảnh trước (Phím ←)"
+              >
+                <svg className="w-6 h-6 stroke-current stroke-2 fill-none group-hover/nav:-translate-x-0.5 transition-transform" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* Nút tiến ảnh tiếp theo (>) - Phím mũi tên Phải */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLightboxNext();
+                }}
+                className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/25 hover:border-amber-400 hover:scale-110 backdrop-blur-md shadow-2xl transition-all cursor-pointer group/nav z-30"
+                title="Ảnh tiếp theo (Phím →)"
+              >
+                <svg className="w-6 h-6 stroke-current stroke-2 fill-none group-hover/nav:translate-x-0.5 transition-transform" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
           </div>
-        </Modal>
+
+          {/* BOTTOM ACTIONS BAR */}
+          <footer className="px-4 py-3 sm:px-6 sm:py-3.5 border-t border-white/10 bg-black/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 text-white z-30">
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-slate-300 hidden md:inline">
+                Dùng phím <kbd className="px-1.5 py-0.5 rounded bg-white/15 text-[11px] font-mono">←</kbd> <kbd className="px-1.5 py-0.5 rounded bg-white/15 text-[11px] font-mono">→</kbd> để duyệt ảnh, <kbd className="px-1.5 py-0.5 rounded bg-white/15 text-[11px] font-mono">Esc</kbd> để thoát
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5 ml-auto">
+              {lightboxPhoto.status === "requested" && (
+                <Button
+                  text="Hủy Yêu Cầu"
+                  className="!bg-rose-600 hover:!bg-rose-700 !text-white !rounded-xl text-xs px-4 py-2"
+                  onClick={(e) => {
+                    handleCancelRequest(e, lightboxPhoto.id);
+                  }}
+                />
+              )}
+              <Button
+                text={
+                  selectedPhotoIds.includes(lightboxPhoto.id)
+                    ? "✓ Đã chọn ảnh này"
+                    : "Chọn ảnh này"
+                }
+                className={`!text-xs px-4 py-2 !rounded-xl ${
+                  selectedPhotoIds.includes(lightboxPhoto.id)
+                    ? "!bg-[#b38840] !text-white font-bold shadow-lg"
+                    : "!bg-white/15 hover:!bg-white/25 !text-white border border-white/20"
+                }`}
+                onClick={() => {
+                  handleToggleSelectPhoto({ stopPropagation: () => {} }, lightboxPhoto.id);
+                }}
+              />
+              <Button
+                text="Chỉnh Sửa Ảnh Này"
+                className="!bg-[#a67c37] hover:!bg-[#946c2d] !text-white !rounded-xl text-xs px-4 py-2 font-semibold shadow-lg"
+                onClick={() => {
+                  setActivePhoto(lightboxPhoto);
+                  setLightboxPhoto(null);
+                }}
+              />
+            </div>
+          </footer>
+        </div>
       )}
     </div>
   );

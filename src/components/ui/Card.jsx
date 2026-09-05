@@ -1,5 +1,6 @@
 import React, { forwardRef } from "react";
 import Icon from "./Icon";
+import ImageAdapter from "./ImageAdapter";
 
 const Card = forwardRef(
   (
@@ -84,7 +85,7 @@ const Card = forwardRef(
         {/* Media Image Top */}
         {img && imgTop && (
           <div className="card-image-top overflow-hidden">
-            <img src={img} alt={imgAlt} className={imgClass} />
+            <ImageAdapter src={img} alt={imgAlt} className={imgClass} />
           </div>
         )}
 
@@ -132,7 +133,7 @@ const Card = forwardRef(
         {/* Media Image Bottom */}
         {img && !imgTop && (
           <div className="card-image-bottom overflow-hidden">
-            <img src={img} alt={imgAlt} className={imgClass} />
+            <ImageAdapter src={img} alt={imgAlt} className={imgClass} />
           </div>
         )}
 

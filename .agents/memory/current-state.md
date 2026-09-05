@@ -106,6 +106,21 @@
     - Hỗ trợ click-outside để tự động đóng dropdown, lọc tức thời danh sách ảnh theo từng version được chọn.
   - **Hero CTA Buttons (Trang Chủ - Home.jsx):** Cố định kích thước 2 nút `[Xem hướng dẫn ►]` và `[Đăng kí →]` bằng nhau chính xác tuyệt đối (`w-44 sm:w-48 !h-12 sm:!h-13`), căn giữa, `whitespace-nowrap`, hiển thị trên 1 dòng duy nhất, cân đối và đồng đều 100%.
 
+- [x] Xây dựng UI ImageAdapter & Nâng cấp Trải nghiệm Phóng to Toàn Màn hình (Fullscreen Cinema Viewer):
+  - **Component & Helper Adapter `ImageAdapter.jsx` (`src/components/ui/ImageAdapter.jsx`):**
+    - Đặt chuẩn vị trí trong `src/components/ui/` và re-export tại `src/components/ui/index.js`.
+    - Hỗ trợ toàn diện 2 dạng nguồn hình ảnh:
+      1. **Dạng Tải Lên (Uploaded):** Đối tượng `File`, `Blob` (tự động tạo và revoke `URL.createObjectURL` để ngăn ngừa triệt để rò rỉ bộ nhớ), chuỗi `data:` base64, đường dẫn tương đối backend (`uploads/...`).
+      2. **Dạng Liên Kết (Link URL):** Đường dẫn web tuyệt đối `http://`, `https://`, CDN, đường dẫn static `/...`.
+    - Tích hợp SVG fallback chuyên nghiệp khi ảnh bị lỗi hoặc rỗng, thuộc tính lazy loading và event handlers (`onLoad`, `onError`).
+    - Thay thế toàn bộ thẻ ảnh thô `src={img}` trong `src/components/ui/Card.jsx` và toàn bộ các vị trí ảnh trong `src/pages/AlbumDetail.jsx`.
+  - **Phóng to Ảnh Cả Màn Hình (Fullscreen Cinema Viewer):**
+    - Khi nhấn vào biểu tượng 2 mũi tên chéo ngược chiều ↗ ↙ (Hình 1) ở góc dưới bên trái thẻ ảnh, hình ảnh sẽ phóng to trọn vẹn cả màn hình (`fixed inset-0 z-[99999]`) thay vì modal nhỏ cục bộ.
+    - **Header Bar:** Hiển thị tên file ảnh, huy hiệu phiên bản, trạng thái, độ phân giải, dung lượng file, bộ đếm số thứ tự `Ảnh X / N`, nút bật/tắt toàn màn hình trình duyệt (Native Fullscreen), và nút Đóng (X).
+    - **Vùng Hiển thị Chính:** Ảnh chất lượng cao phóng to cực đại căn giữa chiếm trọn diện tích màn hình với bóng đổ sâu và độ sắc nét tối ưu.
+    - **Điều hướng Bàn phím & Nút bấm:** Nút trượt ảnh trước (`<`) và ảnh sau (`>`) dạng kính mờ nổi bật ở hai biên màn hình; hỗ trợ phím mũi tên bàn phím (`←` và `→`) để duyệt ảnh và phím `Esc` để đóng tức thì. Tự động khóa cuộn trang nền (`document.body.style.overflow = "hidden"`).
+    - **Thanh Công Cụ Đáy:** Thao tác nhanh cho ảnh đang xem: `Hủy Yêu Cầu` (cho ảnh đã yêu cầu), `Chọn ảnh này` / `✓ Đã chọn`, và `Chỉnh Sửa Ảnh Này`.
+
 ## 2. Kế hoạch tiếp theo
 - Mở rộng các tính năng chỉnh sửa chuyên sâu và export album cho studio.
 

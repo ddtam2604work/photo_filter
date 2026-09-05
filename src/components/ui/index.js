@@ -27,3 +27,4 @@ export { default as Progress, CircularProgress } from "./Progress";
 export { default as Breadcrumb } from "./Breadcrumb";
 export { default as Icon } from "./Icon";
 export { default as ParticlesEffect } from "./ParticlesEffect";
+export { default as ImageAdapter, resolveImageSrc } from "./ImageAdapter";
