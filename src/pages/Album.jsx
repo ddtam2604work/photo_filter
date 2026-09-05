@@ -487,8 +487,136 @@ const Album = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'list'
   const [selectedAlbum, setSelectedAlbum] = useState(null);
+  const [selectedFilmFrame, setSelectedFilmFrame] = useState(null);
   const [filterCategory, setFilterCategory] = useState("all");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+
+  // Tham chiếu & trạng thái điều khiển dải film 35mm
+  const filmTrackRef = useRef(null);
+  const filmOffsetRef = useRef(0);
+  const isFilmPausedRef = useRef(false);
+  const isFilmTransitioningRef = useRef(false);
+  const filmResumeTimerRef = useRef(null);
+
+  // Hiệu ứng cuộn dải film tự động 60fps và điều khiển tiến/lùi <>
+  useEffect(() => {
+    let animId;
+    let lastTime = performance.now();
+
+    const step = (time) => {
+      const dt = Math.min(time - lastTime, 50);
+      lastTime = time;
+
+      if (
+        !isFilmPausedRef.current &&
+        !isFilmTransitioningRef.current &&
+        filmTrackRef.current
+      ) {
+        const track = filmTrackRef.current;
+        const totalWidth = track.scrollWidth;
+        const halfWidth = totalWidth / 2;
+
+        // Vận tốc cuộn liên tục ~38px/giây êm ái
+        filmOffsetRef.current -= 0.042 * dt;
+        if (filmOffsetRef.current <= -halfWidth) {
+          filmOffsetRef.current += halfWidth;
+        }
+        track.style.transform = `translate3d(${filmOffsetRef.current}px, 0, 0)`;
+      }
+
+      animId = requestAnimationFrame(step);
+    };
+
+    animId = requestAnimationFrame(step);
+    return () => {
+      cancelAnimationFrame(animId);
+      if (filmResumeTimerRef.current) clearTimeout(filmResumeTimerRef.current);
+    };
+  }, []);
+
+  // Xử lý nút < (lùi 1 khung hình film)
+  const handlePrevFilm = (e) => {
+    e?.stopPropagation();
+    if (!filmTrackRef.current) return;
+    const track = filmTrackRef.current;
+    const totalWidth = track.scrollWidth;
+    const halfWidth = totalWidth / 2;
+    const stepSize = window.innerWidth < 640 ? 170 : 218;
+
+    isFilmPausedRef.current = true;
+    isFilmTransitioningRef.current = true;
+
+    filmOffsetRef.current += stepSize;
+    if (filmOffsetRef.current > 0) {
+      filmOffsetRef.current -= halfWidth;
+      track.style.transition = "none";
+      track.style.transform = `translate3d(${filmOffsetRef.current - stepSize}px, 0, 0)`;
+      track.offsetHeight; // force reflow
+      filmOffsetRef.current += stepSize;
+    }
+
+    track.style.transition = "transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)";
+    track.style.transform = `translate3d(${filmOffsetRef.current}px, 0, 0)`;
+
+    setTimeout(() => {
+      if (track) track.style.transition = "none";
+      isFilmTransitioningRef.current = false;
+    }, 460);
+
+    if (filmResumeTimerRef.current) clearTimeout(filmResumeTimerRef.current);
+    filmResumeTimerRef.current = setTimeout(() => {
+      isFilmPausedRef.current = false;
+    }, 4000);
+  };
+
+  // Xử lý nút > (tiến 1 khung hình film)
+  const handleNextFilm = (e) => {
+    e?.stopPropagation();
+    if (!filmTrackRef.current) return;
+    const track = filmTrackRef.current;
+    const totalWidth = track.scrollWidth;
+    const halfWidth = totalWidth / 2;
+    const stepSize = window.innerWidth < 640 ? 170 : 218;
+
+    isFilmPausedRef.current = true;
+    isFilmTransitioningRef.current = true;
+
+    filmOffsetRef.current -= stepSize;
+
+    track.style.transition = "transform 0.45s cubic-bezier(0.25, 1, 0.5, 1)";
+    track.style.transform = `translate3d(${filmOffsetRef.current}px, 0, 0)`;
+
+    setTimeout(() => {
+      if (track) {
+        track.style.transition = "none";
+        if (filmOffsetRef.current <= -halfWidth) {
+          filmOffsetRef.current += halfWidth;
+          track.style.transform = `translate3d(${filmOffsetRef.current}px, 0, 0)`;
+        }
+      }
+      isFilmTransitioningRef.current = false;
+    }, 460);
+
+    if (filmResumeTimerRef.current) clearTimeout(filmResumeTimerRef.current);
+    filmResumeTimerRef.current = setTimeout(() => {
+      isFilmPausedRef.current = false;
+    }, 4000);
+  };
+
+  // Điều hướng chuyển ảnh trong Lightbox Modal của dải film
+  const handleFilmModalPrev = () => {
+    if (!selectedFilmFrame) return;
+    const currentIndex = FILM_REEL_FRAMES.findIndex((f) => f.id === selectedFilmFrame.id);
+    const prevIndex = (currentIndex - 1 + FILM_REEL_FRAMES.length) % FILM_REEL_FRAMES.length;
+    setSelectedFilmFrame(FILM_REEL_FRAMES[prevIndex]);
+  };
+
+  const handleFilmModalNext = () => {
+    if (!selectedFilmFrame) return;
+    const currentIndex = FILM_REEL_FRAMES.findIndex((f) => f.id === selectedFilmFrame.id);
+    const nextIndex = (currentIndex + 1) % FILM_REEL_FRAMES.length;
+    setSelectedFilmFrame(FILM_REEL_FRAMES[nextIndex]);
+  };
 
   // SEO: Cập nhật Document Title chuẩn kỹ thuật On-page theo /seo-sge-master
   useEffect(() => {
@@ -576,15 +704,15 @@ const Album = () => {
           aria-label="Album Banner"
           className="relative w-full border-b border-slate-200/70 dark:border-slate-800 pt-4 sm:pt-6 lg:pt-8 pb-8 sm:pb-10 lg:pb-12 bg-[#FBF9F5] dark:bg-slate-950 transition-colors overflow-hidden"
         >
-          {/* HÌNH NỀN LÀM MỜ Ở PHÍA SAU TĂNG TÍNH NGHỆ THUẬT (ARTISTIC DIFFUSED WEDDING BACKGROUND) */}
+          {/* HÌNH NỀN LÀM MỜ Ở PHÍA SAU: ĐƯỢC CHỈNH RÕ HƠN 1 TÍ NHƯNG VẪN MỜ NGHỆ THUẬT THEO YÊU CẦU */}
           <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-xl scale-105 opacity-60 dark:opacity-25 pointer-events-none transition-all duration-500"
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat filter blur-[7px] scale-105 opacity-75 dark:opacity-35 pointer-events-none transition-all duration-500"
             style={{
               backgroundImage: "url('/images/album_banner.jpg')",
             }}
           />
           {/* Lớp phủ chuyển sắc mềm mại tăng tương phản, giữ chữ sắc nét và tôn hình ảnh nghệ thuật */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white/85 via-white/60 to-white/35 dark:from-slate-950/90 dark:via-slate-950/75 dark:to-slate-900/50 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-white/55 to-white/30 dark:from-slate-950/85 dark:via-slate-950/70 dark:to-slate-900/40 pointer-events-none" />
 
           {/* Vệt sáng ấm phim ảnh cổ điển (Ambient Warm Film Flare) */}
           <div className="absolute -top-16 -right-16 w-96 h-96 bg-amber-400/20 dark:bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -621,7 +749,7 @@ const Album = () => {
                 </div>
               </div>
 
-              {/* Cột phải: Dải cuộn phim 10 tấm tự động liên tục (Dịch chuyển nhẹ về bên phải tạo bố cục thoáng) */}
+              {/* Cột phải: Dải cuộn phim 10 tấm tự động liên tục kèm 2 nút điều hướng <> */}
               <div className="lg:col-span-7 xl:col-span-8 flex justify-center lg:justify-end">
                 <div className="relative w-full max-w-2xl lg:max-w-3xl xl:max-w-4xl transform lg:translate-x-8 xl:translate-x-12 -rotate-1 sm:-rotate-2 lg:-rotate-[2.5deg] hover:rotate-0 transition-transform duration-700 ease-out origin-right">
                   {/* Lớp nền ảnh cưới làm mờ nghệ thuật phía sau dải film tạo chiều sâu điện ảnh */}
@@ -633,14 +761,46 @@ const Album = () => {
                   />
                   
                   {/* Thân dải film màu đen bóng cinema với viền và bóng đổ sâu */}
-                  <div className="bg-[#111215] dark:bg-[#08090b] rounded-2xl p-2 sm:p-2.5 shadow-[0_25px_65px_-12px_rgba(0,0,0,0.55)] dark:shadow-[0_25px_65px_-12px_rgba(0,0,0,0.95)] border-2 border-[#24252a] relative select-none overflow-hidden">
+                  <div className="bg-[#111215] dark:bg-[#08090b] rounded-2xl p-2 sm:p-2.5 shadow-[0_25px_65px_-12px_rgba(0,0,0,0.55)] dark:shadow-[0_25px_65px_-12px_rgba(0,0,0,0.95)] border-2 border-[#24252a] relative select-none overflow-hidden group/reel-box">
                     
                     {/* HIỆU ỨNG ÁNH SÁNG PHẢN CHIẾU TRÊN MÀNG FILM */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.03] to-transparent pointer-events-none rounded-2xl z-10" />
 
                     {/* LỚP PHỦ LÀM MỜ BIÊN TRÁI & PHẢI TẠO CẢM GIÁC CUỘN PHIM VÔ TẬN */}
-                    <div className="absolute left-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-r from-[#111215] dark:from-[#08090b] to-transparent z-20 pointer-events-none rounded-l-2xl" />
-                    <div className="absolute right-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-l from-[#111215] dark:from-[#08090b] to-transparent z-20 pointer-events-none rounded-r-2xl" />
+                    <div className="absolute left-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-r from-[#111215] dark:from-[#08090b] to-transparent z-20 pointer-events-none rounded-l-2xl" />
+                    <div className="absolute right-0 top-0 bottom-0 w-12 sm:w-16 bg-gradient-to-l from-[#111215] dark:from-[#08090b] to-transparent z-20 pointer-events-none rounded-r-2xl" />
+
+                    {/* NÚT ĐIỀU HƯỚNG TRÁI < XEM CÁC HÌNH TRONG DÃY FILM */}
+                    <button
+                      type="button"
+                      onClick={handlePrevFilm}
+                      aria-label="Xem khung hình film trước"
+                      className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/85 hover:bg-amber-400 border border-amber-400/80 hover:border-amber-400 text-amber-400 hover:text-slate-950 backdrop-blur-md flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.8)] transition-all duration-200 hover:scale-110 active:scale-95 group/btn-prev cursor-pointer"
+                      title="Khung hình trước (<)"
+                    >
+                      <svg
+                        className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-current stroke-[2.8] fill-none -translate-x-0.5 transition-transform group-hover/btn-prev:-translate-x-1"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+
+                    {/* NÚT ĐIỀU HƯỚNG PHẢI > XEM CÁC HÌNH TRONG DÃY FILM */}
+                    <button
+                      type="button"
+                      onClick={handleNextFilm}
+                      aria-label="Xem khung hình film tiếp theo"
+                      className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-black/85 hover:bg-amber-400 border border-amber-400/80 hover:border-amber-400 text-amber-400 hover:text-slate-950 backdrop-blur-md flex items-center justify-center shadow-[0_4px_16px_rgba(0,0,0,0.8)] transition-all duration-200 hover:scale-110 active:scale-95 group/btn-next cursor-pointer"
+                      title="Khung hình tiếp theo (>)"
+                    >
+                      <svg
+                        className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-current stroke-[2.8] fill-none translate-x-0.5 transition-transform group-hover/btn-next:translate-x-1"
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
 
                     {/* TIÊU ĐỀ KỸ THUẬT FILM TRÊN ĐẦU DẢI (TOP METADATA BANNER) */}
                     <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-mono font-semibold text-amber-400/90 tracking-widest uppercase px-2.5 py-1 border-b border-white/10">
@@ -653,9 +813,21 @@ const Album = () => {
                       <span className="hidden md:inline text-amber-400/70">10 EXP LOOP</span>
                     </div>
 
-                    {/* VÙNG CUỘN FILM TỰ ĐỘNG TUẦN HOÀN 24/7 (AUTOMATIC CONTINUOUS 60FPS CSS MARQUEE) */}
-                    <div className="overflow-hidden relative py-1.5 select-none">
-                      <div className="animate-film-reel flex items-center gap-2 sm:gap-2.5">
+                    {/* VÙNG CUỘN FILM TỰ ĐỘNG TUẦN HOÀN KÈM ĐIỀU HƯỚNG TIẾN/LÙI */}
+                    <div
+                      className="overflow-hidden relative py-1.5 select-none"
+                      onMouseEnter={() => {
+                        isFilmPausedRef.current = true;
+                      }}
+                      onMouseLeave={() => {
+                        isFilmPausedRef.current = false;
+                      }}
+                    >
+                      <div
+                        ref={filmTrackRef}
+                        className="flex items-center gap-2 sm:gap-2.5 will-change-transform"
+                        style={{ width: "max-content" }}
+                      >
                         {INFINITE_FILM_FRAMES.map((frame, index) => (
                           <div
                             key={`reel-${frame.id}-${index}`}
@@ -680,7 +852,7 @@ const Album = () => {
 
                             {/* KHUNG CHỨA ẢNH THẬT */}
                             <div
-                              onClick={() => navigate(`/album/${frame.id}`)}
+                              onClick={() => setSelectedFilmFrame(frame)}
                               className="group/frame relative aspect-[3/4] bg-black overflow-hidden cursor-pointer mx-1.5 my-1 rounded-xs border border-white/10 hover:border-amber-400 transition-all duration-300"
                             >
                               <img
@@ -1075,6 +1247,68 @@ const Album = () => {
                 className="!bg-[#A67C37] !text-white !rounded-xl text-xs px-5 py-2.5"
                 onClick={() => {
                   navigate(`/album/${selectedAlbum?.id || 1}`);
+                }}
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* 7. Lightbox Preview Modal khi click xem ảnh trong dải Film 35mm */}
+      {selectedFilmFrame && (
+        <Modal
+          activeModal={Boolean(selectedFilmFrame)}
+          onClose={() => setSelectedFilmFrame(null)}
+          title={`35mm Film Archive • ${selectedFilmFrame.frameCode}`}
+          className="max-w-3xl !p-0"
+        >
+          <div className="p-4 sm:p-6 space-y-4">
+            <div className="relative rounded-2xl overflow-hidden max-h-[65vh] flex items-center justify-center bg-black">
+              <img
+                src={selectedFilmFrame.coverImage}
+                alt={selectedFilmFrame.title}
+                className="max-h-[65vh] w-auto rounded-xl object-contain shadow-md"
+              />
+              {/* Nút lùi ảnh trong Modal */}
+              <button
+                type="button"
+                onClick={handleFilmModalPrev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/20 hover:border-amber-400 transition-colors cursor-pointer shadow-lg"
+                title="Ảnh trước (<)"
+              >
+                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              {/* Nút tiến ảnh trong Modal */}
+              <button
+                type="button"
+                onClick={handleFilmModalNext}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/20 hover:border-amber-400 transition-colors cursor-pointer shadow-lg"
+                title="Ảnh tiếp theo (>)"
+              >
+                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+            <div className="flex items-center justify-between pt-2">
+              <div>
+                <h4 className="font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                  <span>{selectedFilmFrame.title}</span>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                    EXP {selectedFilmFrame.frameNum}
+                  </span>
+                </h4>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Phân loại: {selectedFilmFrame.category} • Mã phim: Kodak Portra 400 • {selectedFilmFrame.subtext}
+                </p>
+              </div>
+              <Button
+                text="Xem Chi Tiết Album"
+                className="!bg-[#A67C37] !text-white !rounded-xl text-xs px-5 py-2.5"
+                onClick={() => {
+                  navigate(`/album/1`);
                 }}
               />
             </div>

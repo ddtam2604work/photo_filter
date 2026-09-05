@@ -8,6 +8,7 @@ import Textinput from "@/components/ui/Textinput";
 import Icon from "@/components/ui/Icon";
 import Badge from "@/components/ui/Badge";
 import Breadcrumb from "@/components/ui/Breadcrumb";
+import Modal from "@/components/ui/Modal";
 import ParticlesEffect from "@/components/ui/ParticlesEffect";
 import { toast } from "react-toastify";
 import {
@@ -520,6 +521,8 @@ const AlbumDetail = () => {
   const [photos, setPhotos] = useState(INITIAL_PHOTOS);
   // activePhoto: Quản lý mở khung Hình 3 (CHI TIẾT ẢNH). Mặc định ban đầu null = Hình 2 (Lưới ảnh tràn rộng)
   const [activePhoto, setActivePhoto] = useState(null);
+  // lightboxPhoto: Quản lý mở modal phóng to ảnh chất lượng cao khi bấm icon ở góc dưới bên trái thẻ ảnh
+  const [lightboxPhoto, setLightboxPhoto] = useState(null);
   // selectedPhotoIds: Ảnh được tích chọn ở góc phải dưới (mặc định chọn 4 ảnh [5, 6, 7, 8] như hình chụp)
   const [selectedPhotoIds, setSelectedPhotoIds] = useState([5, 6, 7, 8]);
   // Bộ lọc phiên bản ảnh
@@ -534,6 +537,27 @@ const AlbumDetail = () => {
   const [editRequestText, setEditRequestText] = useState("");
   // Input bình luận trong khung Hình 3
   const [commentInput, setCommentInput] = useState("");
+
+  // Mở lightbox xem ảnh phóng to từ icon góc dưới bên trái của thẻ
+  const handleOpenLightbox = (e, photo) => {
+    e.stopPropagation();
+    setLightboxPhoto(photo);
+  };
+
+  // Chuyển ảnh trước/sau trong Lightbox Modal
+  const handleLightboxPrev = () => {
+    if (!lightboxPhoto) return;
+    const currentIndex = filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id);
+    const prevIndex = (currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length;
+    setLightboxPhoto(filteredPhotos[prevIndex]);
+  };
+
+  const handleLightboxNext = () => {
+    if (!lightboxPhoto) return;
+    const currentIndex = filteredPhotos.findIndex((p) => p.id === lightboxPhoto.id);
+    const nextIndex = (currentIndex + 1) % filteredPhotos.length;
+    setLightboxPhoto(filteredPhotos[nextIndex]);
+  };
 
   // Gọi API lấy dữ liệu album theo chuẩn request-manager skill
   useEffect(() => {
@@ -1097,6 +1121,28 @@ const AlbumDetail = () => {
                           </div>
                         )}
 
+                        {/* ICON HÌNH THỨ 2: NÚT PHÓNG TO XEM ẢNH Ở GÓC DƯỚI BÊN TRÁI CỦA THẺ */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenLightbox(e, photo)}
+                          aria-label={`Phóng to xem ảnh ${photo.filename}`}
+                          title="Phóng to xem ảnh"
+                          className="absolute bottom-3 left-3 z-20 w-6.5 h-6.5 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center bg-black/40 hover:bg-black/75 backdrop-blur-xs border-[1.5px] border-white/90 hover:border-white text-white hover:scale-110 shadow-[0_2px_6px_rgba(0,0,0,0.35)] transition-all duration-200 group/expand cursor-pointer"
+                        >
+                          {/* Icon chuẩn 1:1 theo Hình 2 (2 mũi tên chéo góc ngược chiều) */}
+                          <svg
+                            className="w-3.5 h-3.5 stroke-current stroke-[2.4] drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"
+                            />
+                          </svg>
+                        </button>
+
                         {/* NÚT TRÒN CHỌN ẢNH: THIẾT KẾ KÍNH MỜ (FROSTED GLASS) TINH TẾ, THANH THOÁT KHÔNG BỊ THÔ */}
                         <button
                           type="button"
@@ -1141,12 +1187,24 @@ const AlbumDetail = () => {
                             : "border-slate-200/80 dark:border-slate-700 hover:border-slate-300"
                         }`}
                       >
-                        <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700">
+                        <div className="w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-slate-100 dark:bg-slate-700 relative group/thumb">
                           <img
                             src={photo.src}
                             alt={photo.filename}
                             className="w-full h-full object-cover"
                           />
+                          {/* Icon hình thứ 2 trong List View */}
+                          <button
+                            type="button"
+                            onClick={(e) => handleOpenLightbox(e, photo)}
+                            aria-label={`Phóng to ${photo.filename}`}
+                            title="Phóng to xem ảnh"
+                            className="absolute bottom-1 left-1 z-10 w-5 h-5 rounded bg-black/50 hover:bg-black/80 backdrop-blur-xs text-white flex items-center justify-center border border-white/70 transition-colors cursor-pointer"
+                          >
+                            <svg className="w-2.5 h-2.5 stroke-current stroke-[2.4]" fill="none" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                            </svg>
+                          </button>
                         </div>
                         <div className="flex-grow min-w-0">
                           <div className="flex items-center gap-2">
@@ -1440,6 +1498,95 @@ const AlbumDetail = () => {
 
       {/* 7. Footer SpintX */}
       <Footer />
+
+      {/* 8. Lightbox Preview Modal xem ảnh 4K phóng to khi nhấn icon ở góc dưới bên trái thẻ */}
+      {lightboxPhoto && (
+        <Modal
+          activeModal={Boolean(lightboxPhoto)}
+          onClose={() => setLightboxPhoto(null)}
+          title={lightboxPhoto.filename}
+          className="max-w-4xl !p-0"
+        >
+          <div className="p-4 sm:p-6 space-y-4">
+            <div className="relative rounded-2xl overflow-hidden max-h-[70vh] flex items-center justify-center bg-black/95">
+              <img
+                src={lightboxPhoto.src}
+                alt={lightboxPhoto.filename}
+                className="max-h-[70vh] w-auto rounded-xl object-contain shadow-2xl"
+              />
+              {/* Nút ảnh trước (<) */}
+              <button
+                type="button"
+                onClick={handleLightboxPrev}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/20 hover:border-amber-400 transition-colors cursor-pointer shadow-lg"
+                title="Ảnh trước (<)"
+              >
+                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              {/* Nút ảnh tiếp theo (>) */}
+              <button
+                type="button"
+                onClick={handleLightboxNext}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center border border-white/20 hover:border-amber-400 transition-colors cursor-pointer shadow-lg"
+                title="Ảnh tiếp theo (>)"
+              >
+                <svg className="w-5 h-5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h4 className="font-bold text-base text-slate-900 dark:text-white">
+                    {lightboxPhoto.filename}
+                  </h4>
+                  <span className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold px-2 py-0.5 rounded">
+                    {lightboxPhoto.version}
+                  </span>
+                  {lightboxPhoto.statusLabel && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${lightboxPhoto.statusColor}`}>
+                      {lightboxPhoto.statusLabel}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-slate-400">
+                  Độ phân giải: {lightboxPhoto.dimensions} • Dung lượng: {lightboxPhoto.filesize}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <Button
+                  text={
+                    selectedPhotoIds.includes(lightboxPhoto.id)
+                      ? "✓ Đã chọn ảnh này"
+                      : "Chọn ảnh này"
+                  }
+                  className={`!text-xs px-4 py-2 !rounded-xl ${
+                    selectedPhotoIds.includes(lightboxPhoto.id)
+                      ? "!bg-[#b38840] !text-white"
+                      : "!bg-slate-100 dark:!bg-slate-700 !text-slate-700 dark:!text-slate-200 hover:!bg-slate-200"
+                  }`}
+                  onClick={() => {
+                    handleToggleSelectPhoto({ stopPropagation: () => {} }, lightboxPhoto.id);
+                  }}
+                />
+                <Button
+                  text="Chỉnh Sửa Ảnh Này"
+                  className="!bg-[#a67c37] !text-white !rounded-xl text-xs px-4 py-2"
+                  onClick={() => {
+                    setActivePhoto(lightboxPhoto);
+                    setLightboxPhoto(null);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

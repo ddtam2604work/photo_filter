@@ -79,7 +79,19 @@
     - Bộ 3 thẻ cam kết uy tín (Trust Badges): `Hậu kỳ sắc nét 4K Ultra-HD`, `Lắng nghe & chỉnh sửa tận tâm 1:1`, `Lưu trữ & bảo toàn trọn đời`.
   - **Xóa khoảng trắng phía sau Header:** Loại bỏ `pt-20 sm:pt-24` trên thẻ `<main>` và chuyển thành `pt-24 sm:pt-28 lg:pt-[118px]` trực tiếp trên `<section>` banner. Nhờ đó, nền gradient và họa tiết hình học của banner tràn lên tận đỉnh màn hình (`y = 0`) phía sau Header nổi, loại bỏ 100% vệt trắng mà không làm thay đổi bất kỳ khoảng cách hay bố cục nào của breadcrumb, slogan và cụm ảnh.
 
+- [x] Tinh Chỉnh Banner Album, Nút `<>` Dải Film 35mm & Icon Mở Rộng Thẻ Ảnh:
+  - **Hình nền Banner trang Album (`/album` - Album.jsx):** Tinh chỉnh độ mờ từ `blur-xl` xuống `blur-[7px]` kết hợp điều chỉnh độ trong suốt và gradient overlay, giúp hình ảnh cô dâu chú rể và khung cảnh rừng thông trong bức ảnh nền nhận diện rõ ràng hơn ("rõ hơn 1 tí") nhưng vẫn giữ được độ mờ ảo, mềm mịn điện ảnh ("vẫn mờ").
+  - **Dải cuộn film 35mm với 2 nút `<` và `>`:**
+    - Bổ sung 2 nút điều hướng `<` và `>` phong cách vintage Kodak cinema nổi bật tại 2 biên trái và phải của dải film với nền kính mờ đen bóng, viền và icon vàng kim `border-amber-400/80 text-amber-400 hover:bg-amber-400 hover:text-slate-950`.
+    - Chuyển đổi sang cơ chế điều khiển GPU `translate3d` 60fps kết hợp CSS transition gia tốc mượt mà: bấm nút `>` trượt tới 1 khung hình (~218px), bấm nút `<` trượt lùi 1 khung hình, tạm dừng 4 giây để người dùng chiêm ngưỡng trước khi nhẹ nhàng tiếp tục cuộn tuần hoàn.
+    - Bổ sung Lightbox Modal khi nhấn vào khung film hoặc nút "Xem ảnh", hỗ trợ xem kích thước lớn, thông số film cổ điển, nút duyệt qua lại `<` và `>` và nút mở chi tiết album.
+  - **Icon mở rộng ảnh ở góc dưới bên trái thẻ ảnh (`/album/:id` - AlbumDetail.jsx):**
+    - Bổ sung nút icon chuẩn 1:1 theo **Hình 2** (2 mũi tên chéo góc ngược chiều ↗ ↙) vào góc dưới bên trái (`absolute bottom-3 left-3 z-20`) của tất cả các thẻ ảnh trong chế độ Lưới (Grid) và Danh sách (List).
+    - Thiết kế nút dạng hình vuông bo góc `rounded-lg` kính mờ `bg-black/40 hover:bg-black/75 backdrop-blur-xs border-[1.5px] border-white/90 text-white hover:scale-110`, cân đối hoàn hảo với nút tròn checkmark ở góc dưới bên phải.
+    - Nhấn vào icon sẽ kích hoạt Lightbox Modal phóng to ảnh 4K độ nét cao, hiển thị đầy đủ tên file, version, trạng thái, kích thước pixel, dung lượng file, nút duyệt ảnh trước/sau `<` `>` và các thao tác chọn ảnh / yêu cầu chỉnh sửa.
+
 ## 2. Kế hoạch tiếp theo
 - Mở rộng các tính năng chỉnh sửa chuyên sâu và export album cho studio.
+
 
 
