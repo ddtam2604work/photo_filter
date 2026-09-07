@@ -73,8 +73,7 @@ const Home = () => {
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             {/* Primary SEO Heading (H1) matching Hình 2 */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight text-slate-900 dark:text-white font-heading leading-[1.25]">
-              aloalo Nền tảng giao ảnh trực tuyến dành cho Photographer &amp;
-              Studio
+              Nền tảng giao ảnh trực tuyến dành cho Photographer &amp; Studio
             </h1>
 
             {/* SGE Atomic Answer Hook (40-60 words directly answering intent) */}
