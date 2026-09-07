@@ -36,11 +36,15 @@ const Home = () => {
   ];
 
   const handlePrev = () => {
-    setActiveSlide((prev) => (prev === 0 ? carouselImages.length - 1 : prev - 1));
+    setActiveSlide((prev) =>
+      prev === 0 ? carouselImages.length - 1 : prev - 1,
+    );
   };
 
   const handleNext = () => {
-    setActiveSlide((prev) => (prev === carouselImages.length - 1 ? 0 : prev + 1));
+    setActiveSlide((prev) =>
+      prev === carouselImages.length - 1 ? 0 : prev + 1,
+    );
   };
 
   return (
@@ -54,8 +58,7 @@ const Home = () => {
         {/* ========================================================================= */}
         <section
           id="hero"
-          className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 text-center bg-[#FAF8F5] dark:bg-slate-900 transition-colors"
-        >
+          className="relative overflow-hidden pt-16 pb-24 md:pt-24 md:pb-32 text-center bg-[#FAF8F5] dark:bg-slate-900 transition-colors">
           {/* Background Image: banner.jpg matching Hình 2 */}
           <div
             className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-90 dark:opacity-20 transition-opacity duration-300"
@@ -70,12 +73,15 @@ const Home = () => {
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
             {/* Primary SEO Heading (H1) matching Hình 2 */}
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] font-bold tracking-tight text-slate-900 dark:text-white font-heading leading-[1.25]">
-              Nền tảng giao ảnh trực tuyến dành cho Photographer &amp; Studio
+              aloalo Nền tảng giao ảnh trực tuyến dành cho Photographer &amp;
+              Studio
             </h1>
 
             {/* SGE Atomic Answer Hook (40-60 words directly answering intent) */}
             <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
-              Quản lý không giới hạn album, tải ảnh tốc độ cao, chia sẻ bằng liên kết bảo mật và cho phép khách hàng xem, yêu thích, lựa chọn và tải ảnh mọi lúc trên mọi thiết bị.
+              Quản lý không giới hạn album, tải ảnh tốc độ cao, chia sẻ bằng
+              liên kết bảo mật và cho phép khách hàng xem, yêu thích, lựa chọn
+              và tải ảnh mọi lúc trên mọi thiết bị.
             </p>
 
             {/* CTA Buttons matching Hình 2 */}
@@ -86,11 +92,12 @@ const Home = () => {
                 onClick={() => {
                   const workflowElem = document.getElementById("workflow");
                   workflowElem?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
+                }}>
                 <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                   <span>Xem hướng dẫn</span>
-                  <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current translate-y-[0.5px] flex-shrink-0" viewBox="0 0 24 24">
+                  <svg
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current translate-y-[0.5px] flex-shrink-0"
+                    viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
                 </span>
@@ -115,7 +122,9 @@ const Home = () => {
         {/* ========================================================================= */}
         {/* SECTION 2: SHOWCASE / CAROUSEL SECTION */}
         {/* ========================================================================= */}
-        <section id="workflow" className="py-16 md:py-24 bg-white dark:bg-slate-900/60 transition-colors">
+        <section
+          id="workflow"
+          className="py-16 md:py-24 bg-white dark:bg-slate-900/60 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center max-w-3xl mx-auto space-y-3 mb-14">
@@ -123,7 +132,9 @@ const Home = () => {
                 Từ buổi chụp đến tay khách hàng – Chỉ trong vài cú nhấp
               </h2>
               <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mx-auto">
-                Đăng tải ảnh với tốc độ cao, phân loại theo album, chia sẻ bằng một đường dẫn duy nhất và giúp khách hàng xem ảnh ở bất cứ đâu trên điện thoại, máy tính hoặc máy tính bảng.
+                Đăng tải ảnh với tốc độ cao, phân loại theo album, chia sẻ bằng
+                một đường dẫn duy nhất và giúp khách hàng xem ảnh ở bất cứ đâu
+                trên điện thoại, máy tính hoặc máy tính bảng.
               </p>
             </div>
 
@@ -134,8 +145,7 @@ const Home = () => {
                 type="button"
                 onClick={handlePrev}
                 aria-label="Ảnh trước"
-                className="z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white shadow-sm flex items-center justify-center transition-all duration-150 active:scale-95 flex-shrink-0"
-              >
+                className="z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white shadow-sm flex items-center justify-center transition-all duration-150 active:scale-95 flex-shrink-0">
                 <Icon icon="chevron-left" size={22} />
               </button>
 
@@ -145,15 +155,13 @@ const Home = () => {
                   <div
                     key={item.id}
                     className="cursor-pointer group"
-                    onClick={() => setSelectedImage(item)}
-                  >
+                    onClick={() => setSelectedImage(item)}>
                     <Card
                       noborder
                       hoverable
                       shadow
                       className="overflow-hidden rounded-2xl bg-white dark:bg-slate-800 transition-all duration-300 group-hover:-translate-y-1.5 group-hover:shadow-xl"
-                      bodyClass="!p-0"
-                    >
+                      bodyClass="!p-0">
                       <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 dark:bg-slate-800">
                         <img
                           src={item.src}
@@ -179,8 +187,7 @@ const Home = () => {
                 type="button"
                 onClick={handleNext}
                 aria-label="Ảnh kế tiếp"
-                className="z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white shadow-sm flex items-center justify-center transition-all duration-150 active:scale-95 flex-shrink-0"
-              >
+                className="z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 hover:bg-white dark:hover:bg-slate-800 text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white shadow-sm flex items-center justify-center transition-all duration-150 active:scale-95 flex-shrink-0">
                 <Icon icon="chevron-right" size={22} />
               </button>
             </div>
@@ -190,7 +197,9 @@ const Home = () => {
         {/* ========================================================================= */}
         {/* SECTION 3: MASONRY EDITORIAL GALLERY */}
         {/* ========================================================================= */}
-        <section id="albums" className="py-16 md:py-24 bg-[#FAF8F5] dark:bg-slate-900 transition-colors">
+        <section
+          id="albums"
+          className="py-16 md:py-24 bg-[#FAF8F5] dark:bg-slate-900 transition-colors">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Section Header */}
             <div className="text-center space-y-1 mb-14">
@@ -215,8 +224,7 @@ const Home = () => {
                       title: "Kiến trúc cổ điển",
                     })
                   }
-                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[4/3] cursor-pointer shadow-sm hover:shadow-lg transition-all"
-                >
+                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[4/3] cursor-pointer shadow-sm hover:shadow-lg transition-all">
                   <img
                     src="/images/gallery_building.jpg"
                     alt="Cô dâu chú rể chụp ảnh trước tòa dinh thự vàng cổ điển"
@@ -237,8 +245,7 @@ const Home = () => {
                       title: "Studio phong cách Hàn Quốc",
                     })
                   }
-                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-square cursor-pointer shadow-sm hover:shadow-lg transition-all flex-grow"
-                >
+                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-square cursor-pointer shadow-sm hover:shadow-lg transition-all flex-grow">
                   <img
                     src="/images/gallery_studio.jpg"
                     alt="Ảnh cưới studio cô dâu diện váy xòe bồng công chúa"
@@ -260,8 +267,7 @@ const Home = () => {
                     title: "Hoàng hôn lãng mạn",
                   })
                 }
-                className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 min-h-[380px] md:min-h-[520px] cursor-pointer shadow-sm hover:shadow-lg transition-all"
-              >
+                className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 min-h-[380px] md:min-h-[520px] cursor-pointer shadow-sm hover:shadow-lg transition-all">
                 <img
                   src="/images/gallery_center.jpg"
                   alt="Cặp đôi ngược sáng hoàng hôn tung cánh hoa lãng mạn"
@@ -284,8 +290,7 @@ const Home = () => {
                       title: "Tầng thượng hoàng hôn",
                     })
                   }
-                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[4/3] cursor-pointer shadow-sm hover:shadow-lg transition-all"
-                >
+                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[4/3] cursor-pointer shadow-sm hover:shadow-lg transition-all">
                   <img
                     src="/images/gallery_lift.jpg"
                     alt="Chú rể bế cô dâu trên tầng thượng lúc hoàng hôn thành phố"
@@ -306,8 +311,7 @@ const Home = () => {
                       title: "Phong cách mui trần Retro",
                     })
                   }
-                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[4/3] cursor-pointer shadow-sm hover:shadow-lg transition-all flex-grow"
-                >
+                  className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 aspect-[4/3] cursor-pointer shadow-sm hover:shadow-lg transition-all flex-grow">
                   <img
                     src="/images/gallery_car.jpg"
                     alt="Cặp đôi phong cách thời trang đeo kính râm trên xe mui trần cổ điển"
@@ -329,8 +333,7 @@ const Home = () => {
                     title: "Bình minh & Hoàng hôn biển",
                   })
                 }
-                className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 min-h-[380px] md:min-h-[520px] cursor-pointer shadow-sm hover:shadow-lg transition-all"
-              >
+                className="relative group overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 min-h-[380px] md:min-h-[520px] cursor-pointer shadow-sm hover:shadow-lg transition-all">
                 <img
                   src="/images/gallery_beach.jpg"
                   alt="Cô dâu giơ cao hoa cưới trên bờ biển sóng vỗ lúc hoàng hôn"
@@ -373,7 +376,10 @@ const Home = () => {
                   Quản lý album ảnh cưới thông minh
                 </h2>
                 <p className="text-sm sm:text-base md:text-lg text-slate-100 leading-relaxed max-w-2xl mx-auto font-normal drop-shadow">
-                  Tạo album riêng cho từng cặp đôi, cho phép khách hàng xem trước, đánh dấu ảnh yêu thích, lựa chọn ảnh cần chỉnh sửa và tải ảnh sau khi hoàn tất. Tất cả được quản lý trên một nền tảng duy nhất.
+                  Tạo album riêng cho từng cặp đôi, cho phép khách hàng xem
+                  trước, đánh dấu ảnh yêu thích, lựa chọn ảnh cần chỉnh sửa và
+                  tải ảnh sau khi hoàn tất. Tất cả được quản lý trên một nền
+                  tảng duy nhất.
                 </p>
 
                 <div className="pt-3">
@@ -402,8 +408,7 @@ const Home = () => {
           activeModal={Boolean(selectedImage)}
           onClose={() => setSelectedImage(null)}
           title={selectedImage?.title || "Xem ảnh phóng to"}
-          className="max-w-4xl !p-0"
-        >
+          className="max-w-4xl !p-0">
           <div className="p-2 sm:p-4 flex flex-col items-center">
             <img
               src={selectedImage?.src}
