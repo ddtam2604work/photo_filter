@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || process.env.BACKEND_PORT || 6531;
+const PORT = process.env.PORT || 6514;
 
 app.use(cors());
 app.use(express.json());
@@ -28,13 +28,21 @@ app.get("*", (req, res, next) => {
   const indexPath = path.join(distPath, "index.html");
   res.sendFile(indexPath, (err) => {
     if (err) {
-      res.status(200).send("PhotoFlow Frontend Server is running. Chạy 'npm run dev' để phát triển giao diện.");
+      res
+        .status(200)
+        .send(
+          "PhotoFlow Frontend Server is running. Chạy 'npm run dev' để phát triển giao diện.",
+        );
     }
   });
 });
 
 app.listen(PORT, () => {
   console.log(`[PhotoFlow Server] Đang chạy tại http://localhost:${PORT}`);
-  console.log(`[PhotoFlow Server] Health check: http://localhost:${PORT}/api/health`);
-  console.log(`[PhotoFlow Server] Featured Albums API: http://localhost:${PORT}/api/v1/albums/featured`);
+  console.log(
+    `[PhotoFlow Server] Health check: http://localhost:${PORT}/api/health`,
+  );
+  console.log(
+    `[PhotoFlow Server] Featured Albums API: http://localhost:${PORT}/api/v1/albums/featured`,
+  );
 });

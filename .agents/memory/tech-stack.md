@@ -10,7 +10,7 @@
 - **Routing:** `react-router-dom` v6 (Lazy Loading + Suspense)
 - **UI Components:** 28 Atomic Components tại `src/components/ui/` (Tuân thủ nguyên tắc không sửa code bên trong, chỉ truyền props)
 - **Notifications:** `react-toastify`
-- **Tầng API:** `ApiRequestManager` singleton client, `callApi` adapter kết nối tới NestJS API Server (`http://localhost:6531/api`) theo chuẩn `/request-manager` skill
+- **Tầng API:** `ApiRequestManager` singleton client, `callApi` adapter kết nối tới NestJS API Server (`http://localhost:6514/api`) theo chuẩn `/request-manager` skill
 - **Tối ưu tìm kiếm:** Chuẩn On-Page Technical SEO và SGE Hook theo `/seo-sge-master` skill
 
 ## 2. Quy ước bắt buộc (Strict Rules)
