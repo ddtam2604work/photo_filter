@@ -4,12 +4,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "dev:client": "vite",
-    "dev:server": "node server/server.js",
-    "build": "vite build",
+    "dev": "node init && vite",
+    "dev:client": "node init && vite",
+    "dev:server": "node init && node server/server.js",
+    "build": "node init && vite build",
     "preview": "vite preview",
-    "start": "node server/server.js"
+    "start": "node init && node server/server.js"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.4",
