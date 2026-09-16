@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import useDarkMode from "@/hooks/useDarkMode";
 import Icon from "@/components/ui/Icon";
 import { toast } from "react-toastify";
+import { navItems } from "@/constant/data";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -53,12 +54,11 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const navLinks = [
-    { name: "Trang chủ", href: "/" },
-    { name: "Album", href: "/album" },
-    { name: "Giá sự kiện", href: "/#packages" },
-    { name: "Liên hệ", href: "/#footer" },
-  ];
+  // Danh sách liên kết điều hướng đồng bộ từ constant/data (đã lọc theo cờ SHOW_EVENT_PRICING)
+  const navLinks = navItems.map((item) => ({
+    name: item.title,
+    href: item.href,
+  }));
 
   const handleNavClick = (e, href) => {
     if (href.startsWith("/#")) {
@@ -75,6 +75,7 @@ const Navbar = () => {
         elem?.scrollIntoView({ behavior: "smooth" });
       }
     } else {
+      e.preventDefault();
       navigate(href);
     }
   };

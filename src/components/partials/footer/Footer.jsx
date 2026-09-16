@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { footerLinks } from "@/constant/data";
 
 const Footer = () => {
@@ -24,12 +25,22 @@ const Footer = () => {
             <ul className="space-y-2.5">
               {footerLinks.about.map((item) => (
                 <li key={item.title}>
-                  <a
-                    href={item.href}
-                    className="text-sm text-slate-600 hover:text-[#a67c37] dark:text-slate-300 dark:hover:text-[#c99846] transition-colors"
-                  >
-                    {item.title}
-                  </a>
+                  {item.href.startsWith("/") && !item.href.startsWith("/#") ? (
+                    <Link
+                      to={item.href}
+                      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                      className="text-sm text-slate-600 hover:text-[#a67c37] dark:text-slate-300 dark:hover:text-[#c99846] transition-colors"
+                    >
+                      {item.title}
+                    </Link>
+                  ) : (
+                    <a
+                      href={item.href}
+                      className="text-sm text-slate-600 hover:text-[#a67c37] dark:text-slate-300 dark:hover:text-[#c99846] transition-colors"
+                    >
+                      {item.title}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
